@@ -31,13 +31,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import components.MonthCarousel
+import java.time.LocalDate
 
 @Composable
 fun Formulario3(navController: NavHostController) {
     var selectedMonth by remember { mutableStateOf(10) } // Default to October
     var selectedYear by remember { mutableStateOf(2024) } // Default to 2024
-    var selectedDay by remember { mutableStateOf(0L) }
-
+    var selectedDay by remember { mutableStateOf(LocalDate.now()) } // Default to today
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -49,9 +50,7 @@ fun Formulario3(navController: NavHostController) {
             .background(Color.White)) {
             // Progress Bar
             LinearProgressIndicator(
-                progress = {
-                    0.65f // Adjust progress value
-                },
+                progress = 0.65f,
                 modifier = Modifier
                     .width(280.dp)
                     .height(8.dp)
@@ -77,7 +76,6 @@ fun Formulario3(navController: NavHostController) {
         // Content with Background
         Column(modifier = Modifier
             .fillMaxSize()
-
             .background(Color(0xFFF4F4F4))
             .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -88,21 +86,27 @@ fun Formulario3(navController: NavHostController) {
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color(0xFF49454F),
+            )
 
+            Spacer(modifier = Modifier.padding(16.dp))
 
-                )
+            MonthCarousel(
+                selectedMonth = selectedMonth,
+                selectedYear = selectedYear,
+                onMonthSelected = { month, year ->
+                    selectedMonth = month
+                    selectedYear = year
+                },
+                onDaySelected = { date ->
+                    selectedDay = date
+                }
+            )
 
-            Spacer(modifier = Modifier.padding( 16.dp))
-
-
-
-
-
-            Spacer(modifier = Modifier.padding( 16.dp))
+            Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
                 onClick = {
-                    // Save selectedDays to database or state
+                    // Aquí puedes guardar selectedDay en tu base de datos o estado
                     // ...
                     navController.navigate("formulario2")
                 },

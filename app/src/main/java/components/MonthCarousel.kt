@@ -1,16 +1,18 @@
 package components
 
-
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -36,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.YearMonth
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MonthCarousel(
@@ -53,7 +54,6 @@ fun MonthCarousel(
     var currentYear by remember { mutableStateOf(selectedYear) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
 
-
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -61,11 +61,12 @@ fun MonthCarousel(
         // Row with arrows and month/year display
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = {
-                // Go to previous month
                 if (currentMonth == 1) {
                     currentMonth = 12
                     currentYear -= 1
@@ -92,7 +93,6 @@ fun MonthCarousel(
             )
 
             IconButton(onClick = {
-                // Go to next month
                 if (currentMonth == 12) {
                     currentMonth = 1
                     currentYear += 1
@@ -133,66 +133,63 @@ fun CalendarView(
     val firstDayOfMonth = YearMonth.of(currentYear, currentMonth).atDay(1)
     val startDayOfWeek = firstDayOfMonth.dayOfWeek.value % 7 // Ajuste para que domingo sea 0
 
-    Column(
-        modifier = Modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    // Encabezados de los días de la semana
+    val diasDeLaSemana = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom")
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(7),
+        contentPadding = PaddingValues(0.dp)
     ) {
-        // Encabezados de los días de la semana
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly // Espacio equitativo
-        ) {
-            val diasDeLaSemana = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom")
-            for (dia in diasDeLaSemana) {
+        // Agregar los encabezados de los días de la semana
+        items(diasDeLaSemana.size) { index ->
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .border(1.dp, Color.Gray),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    text = dia,
-                    modifier = Modifier.weight(1f),
+                    text = diasDeLaSemana[index],
                     style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
-                    textAlign = TextAlign.Center // Centrar el texto
+                    textAlign = TextAlign.Center
                 )
             }
         }
 
-        // Mostrar una cuadrícula con los días del mes
-        Column {
-            for (week in 0 until 6) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly // Espacio equitativo
-                ) {
-                    for (day in 1..7) {
-                        val dayOfMonth = week * 7 + day - startDayOfWeek
-                        if (dayOfMonth in 1..daysInMonth) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .border(1.dp, Color.Gray) // Añadir borde gris
-                                    .clickable {
-                                        val selectedDate = LocalDate.of(currentYear, currentMonth, dayOfMonth)
-                                        onDaySelected(selectedDate)
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "$dayOfMonth",
-                                    style = TextStyle(
-                                        fontWeight = if (selectedDay.dayOfMonth == dayOfMonth && selectedDay.monthValue == currentMonth) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (selectedDay.dayOfMonth == dayOfMonth && selectedDay.monthValue == currentMonth) Color(0xFFAE6BA4) else Color.Black,
-                                        fontSize = 16.sp
-                                    ),
-                                    textAlign = TextAlign.Center // Centrar el texto
-                                )
-                            }
-                        } else {
-                            // Usar un espacio vacío sin borde para mantener el formato
-                            Box(
-                                modifier = Modifier.size(40.dp)
-                            )
-                        }
-                    }
-                }
+        // Espacios vacíos para los días antes del primer día del mes
+        items(startDayOfWeek) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .border(1.dp, Color.Gray)
+            )
+        }
+
+        // Mostrar los días del mes
+        items(daysInMonth) { day -> // Cambiado a items
+            val dayOfMonth = day + 1
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .border(1.dp, Color.Gray)
+                    .clickable {
+                        val selectedDate = LocalDate.of(currentYear, currentMonth, dayOfMonth)
+                        onDaySelected(selectedDate)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "$dayOfMonth",
+                    style = TextStyle(
+                        fontWeight = if (selectedDay.dayOfMonth == dayOfMonth && selectedDay.monthValue == currentMonth) FontWeight.Bold else FontWeight.Normal,
+                        color = if (selectedDay.dayOfMonth == dayOfMonth && selectedDay.monthValue == currentMonth) Color(0xFFAE6BA4) else Color.Black,
+                        fontSize = 16.sp
+                    ),
+                    textAlign = TextAlign.Center
+                )
             }
         }
+
     }
 }
 
@@ -204,13 +201,7 @@ fun MonthCarouselPreview() {
     MonthCarousel(
         selectedMonth = 1, // January
         selectedYear = 2023,
-        onMonthSelected = { month, year ->
-            // Handle month selection in preview (optional)
-            println("Month selected: $month, Year selected: $year")
-        },
-        onDaySelected = { day ->
-            // Handle day selection in preview (optional)
-            println("Day selected: $day")
-        }
+        onMonthSelected = { month, year -> println("Month selected: $month, Year selected: $year") },
+        onDaySelected = { day -> println("Day selected: $day") }
     )
 }
