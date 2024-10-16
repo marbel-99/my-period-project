@@ -60,7 +60,7 @@ fun Formulario3(navController: NavHostController) {
             )
             // Back Icon
             IconButton(
-                onClick = { navController.navigate("welcome") },
+                onClick = { navController.navigate("Formulario2") },
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .padding(8.dp)
@@ -80,7 +80,8 @@ fun Formulario3(navController: NavHostController) {
             .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Title
+            Spacer(modifier = Modifier.padding(16.dp))
+
             Text(
                 text = "¿Cuándo comenzó tu último período?",
                 textAlign = TextAlign.Center,
@@ -88,7 +89,7 @@ fun Formulario3(navController: NavHostController) {
                 color = Color(0xFF49454F),
             )
 
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = Modifier.padding(36.dp))
 
             MonthCarousel(
                 selectedMonth = selectedMonth,
@@ -102,7 +103,7 @@ fun Formulario3(navController: NavHostController) {
                 }
             )
 
-            Spacer(modifier = Modifier.padding(16.dp))
+            Spacer(modifier = Modifier.padding(70.dp))
 
             Button(
                 onClick = {

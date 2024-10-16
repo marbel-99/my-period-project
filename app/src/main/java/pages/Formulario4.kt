@@ -22,7 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,12 +35,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.project.myperiod.R
-import components.DayCarousel
+import components.ReminderCard
+import java.time.LocalDate
 
 @Composable
-fun Formulario2(navController: NavHostController) {
-    var selectedDays by remember { mutableIntStateOf(28) } // Default value
-
+fun Formulario4(navController: NavHostController) {
+    var selectedMonth by remember { mutableStateOf(10) } // Default to October
+    var selectedYear by remember { mutableStateOf(2024) } // Default to 2024
+    var selectedDay by remember { mutableStateOf(LocalDate.now()) } // Default to today
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -52,9 +54,7 @@ fun Formulario2(navController: NavHostController) {
             .background(Color.White)) {
             // Progress Bar
             LinearProgressIndicator(
-                progress = {
-                    0.45f // Adjust progress value
-                },
+                progress = { 1f },
                 modifier = Modifier
                     .width(280.dp)
                     .height(8.dp)
@@ -64,7 +64,7 @@ fun Formulario2(navController: NavHostController) {
             )
             // Back Icon
             IconButton(
-                onClick = { navController.navigate("Formulario1") },
+                onClick = { navController.navigate("Formulario3") },
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .padding(8.dp)
@@ -77,51 +77,51 @@ fun Formulario2(navController: NavHostController) {
             }
         }
 
+
+
         // Content with Background
         Column(modifier = Modifier
             .fillMaxSize()
-
             .background(Color(0xFFF4F4F4))
             .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.padding(16.dp))
-
+            // Title
             Text(
-                text = "¿Tu ciclo promedio de duración?",
+                text = "¿Establecer un recordatorio?",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color(0xFF49454F),
+            )
+
+            Spacer(modifier = Modifier.padding(26.dp))
 
 
-                )
 
-            Spacer(modifier = Modifier.padding( 20.dp))
+            ReminderCard(
+                selectedDay = selectedDay,
+                selectedMonth = selectedMonth,
+                selectedYear = selectedYear
+            )
 
-            // Calendar Image
+            Spacer(modifier = Modifier.padding(16.dp))
+
             Image(
-                painter = painterResource(id = R.drawable.vulva_formulary2), // Replace with your calendar image
+                painter = painterResource(id = R.drawable.campana), // Replace with your calendar image
                 contentDescription = "Calendar",
                 modifier = Modifier
                     .size(300.dp)
                     .align(Alignment.CenterHorizontally)
-
-
             )
 
-            Spacer(modifier = Modifier.padding( 20.dp))
-
-            DayCarousel(selectedDays) { newDays ->
-                selectedDays = newDays
-            }
-
-            Spacer(modifier = Modifier.padding( 20.dp))
+            Spacer(modifier = Modifier.padding(36.dp))
 
             Button(
                 onClick = {
-                    // Save selectedDays to database or state
+                    // Aquí puedes guardar selectedDay en tu base de datos o estado
                     // ...
-                    navController.navigate("formulario3")
+                    navController.navigate("formulario2")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -136,7 +136,7 @@ fun Formulario2(navController: NavHostController) {
 
 @Preview(showBackground = true)
 @Composable
-fun Formulario2Preview() {
+fun Formulario4Preview() {
     val navController = rememberNavController()
-    Formulario2(navController = navController) // Provide an empty lambda for onLogin
+    Formulario4(navController = navController) // Provide an empty lambda for onLogin
 }
