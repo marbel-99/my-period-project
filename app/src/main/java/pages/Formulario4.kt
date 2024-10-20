@@ -129,7 +129,7 @@ fun Formulario4(navController: NavHostController) {
                     .padding(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
             ) {
-                Text("Siguiente paso", style = MaterialTheme.typography.labelLarge, color = Color(0xFF65558F))
+                Text("Terminar", style = MaterialTheme.typography.labelLarge, color = Color(0xFF65558F))
             }
         }
     }

@@ -2,7 +2,12 @@ package pages
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -16,16 +21,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.delay
 import com.project.myperiod.R
+import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navController: NavHostController) {
+fun SplashScreen(navController: NavHostController, param: (Any) -> Unit) {
     // Importa las fuentes personalizadas
     val arbutusSlab = FontFamily(Font(R.font.arbutus_slab_regular))
     val aoboshiOne = FontFamily(Font(R.font.aoboshi_one_regular))
@@ -80,19 +83,10 @@ fun SplashScreen(navController: NavHostController) {
         }
     }
 
-    // Navegación a la pantalla de bienvenida después de un tiempo de espera
-    LaunchedEffect(Unit) {
-        delay(2000)
-        navController.navigate("welcome") {
-            // Esto elimina la pantalla de splash de la pila de navegación
-            popUpTo("splash") { inclusive = true }
+    LaunchedEffect(key1 = true) {
+        delay(2000) // Delay for 2 seconds
+        navController.navigate("login") {
+            popUpTo(route = "splash") { inclusive = true } // Remove splash screen from back stack
         }
     }
-}
-
-// Función de vista previa
-@Preview(showBackground = true)
-@Composable
-fun PreviewSplashScreen() {
-    SplashScreen(navController = rememberNavController())
 }

@@ -1,14 +1,20 @@
 package pages
 
-import android.renderscript.ScriptGroup.Input
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -25,18 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.project.myperiod.R
 
@@ -48,6 +55,7 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
     var isPasswordValid by remember { mutableStateOf(true) }
     var passwordVisible by remember { mutableStateOf(false) }
     val auth = Firebase.auth
+    val database = Firebase.database
     var isUserNotFound by remember { mutableStateOf(false) }
     if (isUserNotFound) {
         Text("Este usuario no está registrado", color = Color.Red, modifier = Modifier.padding(8.dp))
@@ -137,20 +145,23 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
 
         Button(
             onClick = {
-                auth.signInWithEmailAndPassword(username, password) // Use username or email
+                auth.signInWithEmailAndPassword(username, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             // Sign-in successful
-                            onLogin() // Call the onLogin callback if provided
-                            // Navigate to the next screen or perform other actions
+                            onLogin()
+                            navController.navigate("home") // Navigate to home screen
                         } else {
                             val exception = task.exception
                             if (exception is FirebaseAuthInvalidUserException) {
-                                // Email not found
-                                isUserNotFound = true // Set isUserNotFound to true here
+                                isUserNotFound = true
+                            } else {
+                                // Other authentication error
+                                // Handle the error accordingly
                             }
                         }
-                    } },
+                    }
+            },
             modifier = Modifier
                 .width(160.dp)
                 .padding(horizontal = 12.dp, vertical = 18.dp)
@@ -187,6 +198,13 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
             modifier = Modifier
                 .clickable { navController.navigate("registration") }
                 .padding(8.dp)
+        )
+    }
+    if (isUserNotFound) {
+        Text(
+            "Este usuario no está registrado",
+            color = Color.Red,
+            modifier = Modifier.padding(8.dp)
         )
     }
 

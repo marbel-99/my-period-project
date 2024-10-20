@@ -138,5 +138,5 @@ fun Formulario1(navController: NavHostController, username: String) {
 @Composable
 fun Formulario1Preview() {
     val navController = rememberNavController()
-    Formulario1(navController = navController, username = "Marbel_99") // Provide an empty lambda for onLogin
+    Formulario1(navController = navController, username = "Marble_99") // Provide an empty lambda for onLogin
 }
