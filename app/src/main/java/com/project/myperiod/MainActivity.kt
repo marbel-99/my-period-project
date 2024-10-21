@@ -7,14 +7,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.project.myperiod.ui.theme.MyPeriodTheme
 import components.MonthCarousel
-import androidx.compose.ui.Modifier
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
 
+val supabase = createSupabaseClient(
+    supabaseUrl = "https://ydlptuukgkqmlfhywmse.supabase.co",
+    supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkbHB0dXVrZ2txbWxmaHl3bXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk1MzAyOTcsImV4cCI6MjA0NTEwNjI5N30.T-phORm3N8G-tEBMMS4bXDFf1YYrZCn9r0Ai68Gv5hA"
+) {
+    install(Postgrest)
+}
 
 class MainActivity : ComponentActivity() {
     private lateinit var mAuth: FirebaseAuth
