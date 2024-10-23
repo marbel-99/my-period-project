@@ -28,7 +28,7 @@ import com.project.myperiod.R
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navController: NavHostController, param: (Any) -> Unit) {
+fun SplashScreen(navController: NavHostController) {
     // Importa las fuentes personalizadas
     val arbutusSlab = FontFamily(Font(R.font.arbutus_slab_regular))
     val aoboshiOne = FontFamily(Font(R.font.aoboshi_one_regular))

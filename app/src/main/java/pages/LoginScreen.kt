@@ -41,11 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import com.project.myperiod.R
+
 
 @Composable
 fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
@@ -54,12 +51,13 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
     var isUsernameValid by remember { mutableStateOf(true) }
     var isPasswordValid by remember { mutableStateOf(true) }
     var passwordVisible by remember { mutableStateOf(false) }
-    val auth = Firebase.auth
-    val database = Firebase.database
-    var isUserNotFound by remember { mutableStateOf(false) }
-    if (isUserNotFound) {
-        Text("Este usuario no está registrado", color = Color.Red, modifier = Modifier.padding(8.dp))
-    }
+    val isUserNotFound by remember { mutableStateOf(false) }
+//    var showCityPopup by remember { mutableStateOf(false) }
+//    var city by remember { mutableStateOf<City?>(null) }
+//    val supabaseDatabase = SupabaseData()
+//    val coroutineScope = rememberCoroutineScope()
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -145,22 +143,36 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
 
         Button(
             onClick = {
-                auth.signInWithEmailAndPassword(username, password)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            // Sign-in successful
-                            onLogin()
-                            navController.navigate("home") // Navigate to home screen
-                        } else {
-                            val exception = task.exception
-                            if (exception is FirebaseAuthInvalidUserException) {
-                                isUserNotFound = true
-                            } else {
-                                // Other authentication error
-                                // Handle the error accordingly
-                            }
-                        }
-                    }
+//                coroutineScope.launch {
+//                    try {
+//                        city = supabaseDatabase.getCityNames()
+//                        showCityPopup = true
+//                    } catch (e: Exception) {
+//                        // Handle error, e.g., log it or display an error message
+//                        Log.e("LoginScreen", "Error fetching city names", e)
+//                    }
+//                }
+
+
+
+
+// Process the cityNames list
+//                auth.signInWithEmailAndPassword(username, password)
+//                    .addOnCompleteListener { task ->
+//                        if (task.isSuccessful) {
+//                            // Sign-in successful
+//                            onLogin()
+//                            navController.navigate("home") // Navigate to home screen
+//                        } else {
+//                            val exception = task.exception
+//                            if (exception is FirebaseAuthInvalidUserException) {
+//                                isUserNotFound = true
+//                            } else {
+//                                // Other authentication error
+//                                // Handle the error accordingly
+//                            }
+//                        }
+//                    }
             },
             modifier = Modifier
                 .width(160.dp)
@@ -209,11 +221,28 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
     }
 
 
+//    if (showCityPopup && city != null) { // Check if city is not null
+//        AlertDialog(
+//            onDismissRequest = { showCityPopup = false },
+//            title = { Text("City Names") },
+//            text = {
+//                Text("City ID: ${city?.id}, City Name: ${city?.name}") // Display city data
+//            },
+//            confirmButton = {
+//                Button(onClick = { showCityPopup = false }) {
+//                    Text("OK")
+//                }
+//            }
+//        )
+//    }
+
+
+
 }
 
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
     val navController = rememberNavController()
-    LoginScreen(navController = navController, onLogin = {})
+    LoginScreen(navController = navController , onLogin = {}) // Provide an empty lambda for onLogin)
 }
