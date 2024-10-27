@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.project.myperiod.FirebaseAuthentication
 import com.project.myperiod.R
 import kotlinx.coroutines.delay
 
@@ -32,6 +33,7 @@ fun SplashScreen(navController: NavHostController) {
     // Importa las fuentes personalizadas
     val arbutusSlab = FontFamily(Font(R.font.arbutus_slab_regular))
     val aoboshiOne = FontFamily(Font(R.font.aoboshi_one_regular))
+    val firebaseAuth = FirebaseAuthentication()
 
     // Pantalla principal con fondo blanco
     Surface(
@@ -85,8 +87,15 @@ fun SplashScreen(navController: NavHostController) {
 
     LaunchedEffect(key1 = true) {
         delay(2000) // Delay for 2 seconds
-        navController.navigate("login") {
-            popUpTo(route = "splash") { inclusive = true } // Remove splash screen from back stack
+        if (firebaseAuth.isUserLoggedIn) {
+            navController.navigate("home") {
+                popUpTo(route = "splash") { inclusive = true } // Remove splash screen from back stack
+            }
+        } else {
+            navController.navigate("login") {
+                popUpTo(route = "splash") { inclusive = true } // Remove splash screen from back stack
+            }
         }
+
     }
 }

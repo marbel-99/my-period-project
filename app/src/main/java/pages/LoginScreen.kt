@@ -1,5 +1,6 @@
 package pages
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,21 +44,54 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.project.myperiod.FirebaseAuthentication
+import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
-
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
+fun LoginScreen(navController: NavHostController)  {
+    var dialogTitle = remember { mutableStateOf("Dialog Title") }
+    var dialogBody = remember { mutableStateOf("Dialog Body") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isUsernameValid by remember { mutableStateOf(true) }
     var isPasswordValid by remember { mutableStateOf(true) }
     var passwordVisible by remember { mutableStateOf(false) }
     val isUserNotFound by remember { mutableStateOf(false) }
-//    var showCityPopup by remember { mutableStateOf(false) }
-//    var city by remember { mutableStateOf<City?>(null) }
-//    val supabaseDatabase = SupabaseData()
-//    val coroutineScope = rememberCoroutineScope()
+    var showPopup by remember { mutableStateOf(false) }
+    val firebaseDatabase = FirebaseDatabase()
+    val firebaseAuthentication = FirebaseAuthentication()
+
+    val coroutineScope = rememberCoroutineScope()
+
+    fun navigateToHome() {
+        navController.navigate("home") {
+            popUpTo(route = "login") { inclusive = true } // Remove splash screen from back stack
+        }
+    }
+
+    fun getCitiesList() {
+        try {
+            firebaseDatabase.getCities { cities ->
+                dialogTitle.value = "Cities Dialog"
+                val city = cities.last()
+                dialogBody.value = "City ID: ${city.id}, City Name: ${city.name}"
+                showPopup = true
+            }
+        } catch (e: Exception) {
+            // Handle error, e.g., log it or display an error message
+            Log.e("LoginScreen", "Error fetching city names", e)
+        }
+    }
+
+    fun showPopup(title: String?, message: String?) {
+        if (title != null && message != null) {
+            dialogTitle.value = title
+            dialogBody.value = message
+            showPopup = true
+        }
+    }
 
 
     Column(
@@ -143,36 +179,22 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
 
         Button(
             onClick = {
-//                coroutineScope.launch {
-//                    try {
-//                        city = supabaseDatabase.getCityNames()
-//                        showCityPopup = true
-//                    } catch (e: Exception) {
-//                        // Handle error, e.g., log it or display an error message
-//                        Log.e("LoginScreen", "Error fetching city names", e)
-//                    }
-//                }
-
-
-
-
-// Process the cityNames list
-//                auth.signInWithEmailAndPassword(username, password)
-//                    .addOnCompleteListener { task ->
-//                        if (task.isSuccessful) {
-//                            // Sign-in successful
-//                            onLogin()
-//                            navController.navigate("home") // Navigate to home screen
-//                        } else {
-//                            val exception = task.exception
-//                            if (exception is FirebaseAuthInvalidUserException) {
-//                                isUserNotFound = true
-//                            } else {
-//                                // Other authentication error
-//                                // Handle the error accordingly
-//                            }
-//                        }
-//                    }
+                coroutineScope.launch {
+                    val onSuccess = {
+                        navigateToHome()
+                    }
+                    val onFailure = { exception: Exception ->
+                        Log.e("LoginScreen", exception.toString(), exception)
+                        showPopup("Error", exception.message ?: "Unknown error")
+                        Unit
+                    }
+                    if (username.isNotEmpty() && password.isNotEmpty()) {
+                        firebaseAuthentication.loginWithEmailAndPassword(username.trim(), password.trim(), onSuccess, onFailure)
+                    } else {
+                        // Avisa al usuario de que es null
+                        showPopup("Hay un error", "Por favor, ingresa un nombre de usuario y una contraseña")
+                    }
+                }
             },
             modifier = Modifier
                 .width(160.dp)
@@ -220,23 +242,20 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
         )
     }
 
-
-//    if (showCityPopup && city != null) { // Check if city is not null
-//        AlertDialog(
-//            onDismissRequest = { showCityPopup = false },
-//            title = { Text("City Names") },
-//            text = {
-//                Text("City ID: ${city?.id}, City Name: ${city?.name}") // Display city data
-//            },
-//            confirmButton = {
-//                Button(onClick = { showCityPopup = false }) {
-//                    Text("OK")
-//                }
-//            }
-//        )
-//    }
-
-
+    if (showPopup) {
+        AlertDialog(
+            onDismissRequest = { showPopup = false },
+            title = { Text(dialogTitle.value) },
+            text = {
+                Text(dialogBody.value)
+            },
+            confirmButton = {
+                Button(onClick = { showPopup = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 
 }
 
@@ -244,5 +263,5 @@ fun LoginScreen(navController: NavHostController, onLogin: () -> Unit)  {
 @Composable
 fun LoginScreenPreview() {
     val navController = rememberNavController()
-    LoginScreen(navController = navController , onLogin = {}) // Provide an empty lambda for onLogin)
+    LoginScreen(navController = navController) // Provide an empty lambda for onLogin)
 }

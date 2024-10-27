@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import pages.Home
 import pages.LoginScreen
 import pages.SplashScreen
 
@@ -14,12 +15,17 @@ fun MyNavigation(navController: NavHostController) {
             SplashScreen(navController)
         }
         composable("login") {
-            LoginScreen(navController, onLogin = { navController.navigate("home")} )
-      }
+            LoginScreen(navController)
+        }
+        composable("home") {
+            Home(navController)
+        }
+
+        // Aquí debes añadir tantas pantallas como necesites.
+
 //        composable("registration") {
 //            RegistrationScreen(navController, onRegister = { navController.navigate("formulario1") })
 //        }
-//        composable("home") { Home() }
 //        composable("formulario1") {
 //
 //
