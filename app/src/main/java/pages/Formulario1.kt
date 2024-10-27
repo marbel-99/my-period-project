@@ -38,7 +38,7 @@ import com.project.myperiod.R
 import components.DayCarousel
 
 @Composable
-fun Formulario1(navController: NavHostController, username: String) {
+fun Formulario1(navController: NavHostController) {
     var selectedDays by remember { mutableIntStateOf(28) } // Default value
 
 
@@ -88,7 +88,8 @@ fun Formulario1(navController: NavHostController, username: String) {
             Spacer(modifier = Modifier.padding(16.dp))
 
             Text(
-                text = "$username," +
+                text =
+//                "$username," +
 
                         "\n¿Tu período promedio de duración?",
                 textAlign = TextAlign.Center,
@@ -138,5 +139,5 @@ fun Formulario1(navController: NavHostController, username: String) {
 @Composable
 fun Formulario1Preview() {
     val navController = rememberNavController()
-    Formulario1(navController = navController, username = "Marble_99") // Provide an empty lambda for onLogin
+    Formulario1(navController = navController) // Provide an empty lambda for onLogin
 }

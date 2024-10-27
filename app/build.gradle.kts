@@ -69,6 +69,7 @@ dependencies {
     implementation (libs.core)
     implementation (libs.calendar)
     implementation(libs.androidx.benchmark.macro)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

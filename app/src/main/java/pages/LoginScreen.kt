@@ -71,6 +71,10 @@ fun LoginScreen(navController: NavHostController)  {
         }
     }
 
+    fun navigateToRegistration () {
+        navController.navigate("registration")
+    }
+
     fun getCitiesList() {
         try {
             firebaseDatabase.getCities { cities ->
@@ -230,7 +234,7 @@ fun LoginScreen(navController: NavHostController)  {
             color = Color(0xFF65558F),
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
-                .clickable { navController.navigate("registration") }
+                .clickable { navigateToRegistration()}
                 .padding(8.dp)
         )
     }

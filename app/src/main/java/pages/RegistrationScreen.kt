@@ -1,5 +1,6 @@
 package pages
 
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,10 +44,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.project.myperiod.FirebaseAuthentication
+import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
+import kotlinx.coroutines.launch
 
 @Composable
-fun RegistrationScreen(navController: NavHostController, onRegister: () -> Unit) {
+fun RegistrationScreen(navController: NavHostController) {
+    var dialogTitle = remember { mutableStateOf("Dialog Title") }
+    var dialogBody = remember { mutableStateOf("Dialog Body") }
+    var showPopup by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     var email by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
     var username by remember { mutableStateOf("") }
@@ -59,6 +68,10 @@ fun RegistrationScreen(navController: NavHostController, onRegister: () -> Unit)
     if (isEmailRegistered) {
         Text("Este usuario ya está registrado", color = Color.Red, modifier = Modifier.padding(8.dp))
     }
+
+    val firebaseDatabase = FirebaseDatabase()
+    val firebaseAuthentication = FirebaseAuthentication()
+
     val onRegister = {
 //        val user = auth.currentUser // Get the currently authenticated user
 //        if (user != null) {
@@ -66,15 +79,29 @@ fun RegistrationScreen(navController: NavHostController, onRegister: () -> Unit)
 //            val userData = HashMap<String, Any>()
 //            userData["email"] = email
 //            userData["username"] = username
-            // Add other user data as needed
-
+//
+//
 //            database.reference.child("users").child(userId).setValue(userData)
 //                .addOnSuccessListener {
 //                    // Data saved successfully
 //                    navController.navigate("formulario1") // Navigate to Formulario1
 //                }
-
+//
 //        }
+    }
+
+    fun navigateToFormulario1() {
+        navController.navigate("formulario1") {
+            popUpTo(route = "registration") { inclusive = true } // Remove splash screen from back stack
+        }
+    }
+
+    fun showPopup(title: String?, message: String?) {
+        if (title != null && message != null) {
+            dialogTitle.value = title
+            dialogBody.value = message
+            showPopup = true
+        }
     }
 
     Column(
@@ -136,23 +163,23 @@ fun RegistrationScreen(navController: NavHostController, onRegister: () -> Unit)
         )
 
 
-        OutlinedTextField(
-            value = username,
-            onValueChange = {
-                username = it
-                isUsernameValid = it.isNotBlank()
-                            },
-            label = { Text("Nombre de usuario", color = Color(0xFF65558F)) },
-            leadingIcon = {
-                Icon(
-                    painter =  painterResource(id = R.drawable.baseline_person_3_24),
-                    contentDescription = "Person Icon"
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
+//        OutlinedTextField(
+//            value = username,
+//            onValueChange = {
+//                username = it
+//                isUsernameValid = it.isNotBlank()
+//                            },
+//            label = { Text("Nombre de usuario", color = Color(0xFF65558F)) },
+//            leadingIcon = {
+//                Icon(
+//                    painter =  painterResource(id = R.drawable.baseline_person_3_24),
+//                    contentDescription = "Person Icon"
+//                )
+//            },
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp)
+//        )
 
         // Password Input
         OutlinedTextField(
@@ -219,24 +246,26 @@ fun RegistrationScreen(navController: NavHostController, onRegister: () -> Unit)
 
         Button(
             onClick = {
-                // Validate email and passwords here (you already have this logic)
-//                if (isEmailValid && isRepeatPasswordValid && isUsernameValid && isPasswordValid) {
-//                    auth.createUserWithEmailAndPassword(email, password)
-//                        .addOnCompleteListener { task ->
-//                            if (task.isSuccessful) {
-//                                // Registration successful
-//                                onRegister()
-//                                // ...
-//                            } else {
-//                                // Registration failed
-//                                val exception = task.exception
-//                                if (exception is FirebaseAuthUserCollisionException) {
-//                                    // Email is already registered
-//                                    isEmailRegistered = true
-//                                }
-//                            }
-//                        }
-//                }
+                coroutineScope.launch {
+                    val onSuccess = {
+                        navigateToFormulario1()
+                    }
+                    val onFailure = { exception: Exception ->
+                        Log.e("RegistrationScreen", exception.toString(), exception)
+                        showPopup("Error", exception.message ?: "Unknown error")
+                    }
+
+                    if (isEmailValid && isRepeatPasswordValid && isUsernameValid && isPasswordValid) {
+                        firebaseAuthentication.registerUser(
+                            email.trim(),
+                            password.trim(),
+                            onSuccess,
+                            onFailure
+                        )
+                    } else {
+                        showPopup("Hay un error", "Por favor, ingresa un nombre de usuario y una contraseña correctos")
+                    }
+            }
             },
             modifier = Modifier
                 .width(160.dp)
@@ -282,5 +311,5 @@ fun RegistrationScreen(navController: NavHostController, onRegister: () -> Unit)
 @Composable
 fun RegistrationScreenPreview() {
     val navController = rememberNavController()
-    RegistrationScreen(navController = navController, onRegister = {}) // Provide an empty lambda for onLogin
+    RegistrationScreen(navController = navController)
 }
