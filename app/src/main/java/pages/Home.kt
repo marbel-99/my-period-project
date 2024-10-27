@@ -39,13 +39,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.project.myperiod.FirebaseAuthentication
 import com.project.myperiod.R
 import components.CyclePhasesCard
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home() {
+fun Home(navController: NavController) {
+    
+    val firebaseAuthentication = FirebaseAuthentication()
+
+    fun navigateToLogin() {
+        navController.navigate("login") {
+            popUpTo(route = "home") { inclusive = true } // Remove splash screen from back stack
+        }
+    }
 
     var drawerState by remember { mutableStateOf(DrawerValue.Closed) }
     Scaffold(
@@ -122,7 +133,10 @@ fun Home() {
 
             // Button with pause icon
             Button(
-                onClick = { /* Handle button click */ },
+                onClick = {
+                    firebaseAuthentication.logout()
+                    navigateToLogin()
+                },
                 modifier = Modifier
                     .width(190.dp)
                     .height(52.dp)
@@ -183,5 +197,6 @@ fun Home() {
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
-    Home()
+    val navController = rememberNavController()
+    Home(navController)
 }

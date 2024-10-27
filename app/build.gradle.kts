@@ -61,11 +61,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    implementation(platform("io.github.jan-tennert.supabase:bom:3.0.1"))
-    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.github.jan-tennert.supabase:auth-kt")
-    implementation("io.github.jan-tennert.supabase:realtime-kt")
-
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.espresso.core)
@@ -81,4 +76,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.auth)
 }
