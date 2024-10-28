@@ -122,7 +122,7 @@ fun Formulario4(navController: NavHostController) {
                 onClick = {
                     // Aquí puedes guardar selectedDay en tu base de datos o estado
                     // ...
-                    navController.navigate("formulario2")
+                    navController.navigate("home")
                 },
                 modifier = Modifier
                     .fillMaxWidth()

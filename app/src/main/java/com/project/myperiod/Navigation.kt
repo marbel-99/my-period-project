@@ -5,6 +5,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import pages.Formulario1
+import pages.Formulario2
+import pages.Formulario3
+import pages.Formulario4
 import pages.Home
 import pages.LoginScreen
 import pages.RegistrationScreen
@@ -28,9 +31,15 @@ fun MyNavigation(navController: NavHostController) {
         composable("formulario1") {
             Formulario1(navController)
         }
-//        composable("formulario2") { Formulario2(navController) }
-//        composable("formulario3") { Formulario3(navController) }
-//        composable("formulario4") { Formulario4(navController) }
-//    }
+        composable("formulario2") {
+            Formulario2(navController)
+        }
+        composable("formulario3") {
+            Formulario3(navController)
+        }
+        composable("formulario4") {
+            Formulario4(navController)
+        }
+
     }
 }

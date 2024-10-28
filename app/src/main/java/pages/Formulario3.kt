@@ -31,6 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.project.myperiod.FirebaseAuthentication
+import com.project.myperiod.FirebaseDatabase
 import components.MonthCarousel
 import java.time.LocalDate
 
@@ -39,6 +41,8 @@ fun Formulario3(navController: NavHostController) {
     var selectedMonth by remember { mutableStateOf(10) } // Default to October
     var selectedYear by remember { mutableStateOf(2024) } // Default to 2024
     var selectedDay by remember { mutableStateOf(LocalDate.now()) } // Default to today
+    val firebaseDatabase = FirebaseDatabase()
+    val firebaseAuthentication = FirebaseAuthentication()
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -107,9 +111,9 @@ fun Formulario3(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    // Aquí puedes guardar selectedDay en tu base de datos o estado
-                    // ...
-                    navController.navigate("formulario2")
+                    firebaseAuthentication.getCurrentUserUid()
+                        ?.let { firebaseDatabase.setInitialPeriod(it,"$selectedDay" ) }
+                    navController.navigate("formulario4")
                 },
                 modifier = Modifier
                     .fillMaxWidth()

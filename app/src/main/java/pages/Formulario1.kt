@@ -34,12 +34,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.project.myperiod.FirebaseAuthentication
+import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
 import components.DayCarousel
 
 @Composable
 fun Formulario1(navController: NavHostController) {
     var selectedDays by remember { mutableIntStateOf(28) } // Default value
+    val firebaseDatabase = FirebaseDatabase()
+    val firebaseAuthentication = FirebaseAuthentication()
+
 
 
     Column(modifier = Modifier
@@ -64,7 +69,7 @@ fun Formulario1(navController: NavHostController) {
             )
             // Back Icon
             IconButton(
-                onClick = { navController.navigate("welcome") },
+                onClick = { navController.navigate("registration") },
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .padding(8.dp)
@@ -80,7 +85,6 @@ fun Formulario1(navController: NavHostController) {
         // Content with Background
         Column(modifier = Modifier
             .fillMaxSize()
-
             .background(Color(0xFFF4F4F4))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,9 +93,7 @@ fun Formulario1(navController: NavHostController) {
 
             Text(
                 text =
-//                "$username," +
-
-                        "\n¿Tu período promedio de duración?",
+                        "¿Tu período promedio de duración?",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium,
                 color = Color(0xFF49454F),
@@ -120,8 +122,8 @@ fun Formulario1(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    // Save selectedDays to database or state
-                    // ...
+                    firebaseAuthentication.getCurrentUserUid()
+                        ?.let { firebaseDatabase.setAveragePeriod(it,selectedDays) }
                     navController.navigate("formulario2")
                 },
                 modifier = Modifier

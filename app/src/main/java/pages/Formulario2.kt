@@ -34,13 +34,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.project.myperiod.FirebaseAuthentication
+import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
 import components.DayCarousel
 
 @Composable
 fun Formulario2(navController: NavHostController) {
     var selectedDays by remember { mutableIntStateOf(28) } // Default value
-
+    val firebaseDatabase = FirebaseDatabase()
+    val firebaseAuthentication = FirebaseAuthentication()
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -119,8 +122,8 @@ fun Formulario2(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    // Save selectedDays to database or state
-                    // ...
+                    firebaseAuthentication.getCurrentUserUid()
+                        ?.let { firebaseDatabase.setFrequencyPeriod(it,selectedDays) }
                     navController.navigate("formulario3")
                 },
                 modifier = Modifier

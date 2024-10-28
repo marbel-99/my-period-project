@@ -265,7 +265,7 @@ fun RegistrationScreen(navController: NavHostController) {
                     } else {
                         showPopup("Hay un error", "Por favor, ingresa un nombre de usuario y una contraseña correctos")
                     }
-            }
+                 }
             },
             modifier = Modifier
                 .width(160.dp)
