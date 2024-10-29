@@ -1,6 +1,9 @@
 package com.project.myperiod
 
 import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
 
@@ -28,6 +31,31 @@ class FirebaseDatabase {
 
   fun setInitialPeriod(userId: String, date: String) {
     myPeriodDatabase.child("period_initial_registered").child(userId).child("date").setValue(date)
+  }
+
+  fun getLastPeriodDate(userId: String, callback: (Period?) -> Unit) {
+    val periodsRef = myPeriodDatabase.child("periods").child(userId)
+
+    periodsRef.orderByKey().limitToLast(1).addListenerForSingleValueEvent(object :
+      ValueEventListener {
+      override fun onDataChange(snapshot: DataSnapshot) {
+        if (snapshot.exists()) {
+          // Itera sobre los hijos (debería ser solo uno debido a `limitToLast(1)`)
+          for (childSnapshot in snapshot.children) {
+            val lastRecord = childSnapshot.getValue(Period::class.java)
+            callback.invoke(lastRecord)
+          }
+        } else {
+          // No se encontraron registros
+          callback.invoke(null)
+        }
+      }
+
+      override fun onCancelled(error: DatabaseError) {
+        println("Error al obtener el último registro: ${error.message}")
+        callback.invoke(null)
+      }
+    })
   }
 
 

@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.project.myperiod.FirebaseAuthentication
+import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
 import components.CyclePhasesCard
 
@@ -51,12 +53,40 @@ import components.CyclePhasesCard
 fun Home(navController: NavController) {
     
     val firebaseAuthentication = FirebaseAuthentication()
+    val firebaseDatabase = FirebaseDatabase()
+
+    var isInPeriod by remember { mutableStateOf(false) }
+    val remainingDaysText = calculateRemainingDaysText(initialDate, frequencyDays)
+
 
     fun navigateToLogin() {
         navController.navigate("login") {
             popUpTo(route = "home") { inclusive = true } // Remove splash screen from back stack
         }
     }
+
+    fun calculateIsInPeriod() {
+        firebaseAuthentication.getCurrentUserUid()?.let { userId ->
+            firebaseDatabase.getLastPeriodDate(userId) { lastPeriod ->
+                isInPeriod = lastPeriod?.end_date == null  // Actualiza isInPeriod según el end_date del último periodo
+            }
+        } ?: run {
+            isInPeriod = false  // Si el usuario no está autenticado, se establece como false
+        }
+    }
+
+
+    // LaunchedEffect to call calculateIsInPeriod when Home is displayed
+    LaunchedEffect(Unit) {
+        calculateIsInPeriod()
+    }
+
+
+
+    fun calculateRemainingDaysText(initialDate: Date, frequencyDays: Int): String {
+        return "Faltan $remainingDays días"
+    }
+
 
     var drawerState by remember { mutableStateOf(DrawerValue.Closed) }
     Scaffold(
@@ -105,6 +135,7 @@ fun Home(navController: NavController) {
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.padding(8.dp))
+
 
             // Title in AE6BA4 color
             Text(
