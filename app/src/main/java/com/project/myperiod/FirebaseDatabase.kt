@@ -40,7 +40,7 @@ class FirebaseDatabase {
       ValueEventListener {
       override fun onDataChange(snapshot: DataSnapshot) {
         if (snapshot.exists()) {
-          // Itera sobre los hijos (debería ser solo uno debido a `limitToLast(1)`)
+          // Itera sobre los hijos (debería ser solo uno debido a limitToLast(1))
           for (childSnapshot in snapshot.children) {
             val lastRecord = childSnapshot.getValue(Period::class.java)
             callback.invoke(lastRecord)
@@ -57,6 +57,30 @@ class FirebaseDatabase {
       }
     })
   }
+
+  fun fetchFrequencyDays(userId: String, callback: (Int) -> Unit) {
+    myPeriodDatabase.child("frequency_period").child(userId).child("frequency_days").get()
+      .addOnSuccessListener { snapshot -> callback(snapshot.getValue(Int::class.java) ?: 0) }
+      .addOnFailureListener { callback(0) }
+  }
+
+
+  fun fetchInitialPeriodDate(userId: String, callback: (String?) -> Unit) {
+    myPeriodDatabase.child("period_initial_registered").child(userId).child("date").get()
+      .addOnSuccessListener { snapshot -> callback(snapshot.getValue(String::class.java)) }
+      .addOnFailureListener { callback(null) }
+  }
+
+
+  fun fetchAveragePeriodDays(userId: String, callback: (Int) -> Unit) {
+    myPeriodDatabase.child("average_period").child(userId).child("average_days").get()
+      .addOnSuccessListener { snapshot -> callback(snapshot.getValue(Int::class.java) ?: 0) }
+      .addOnFailureListener { callback(0) }
+  }
+
+
+
+
 
 
 }

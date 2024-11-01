@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -46,17 +47,25 @@ import com.project.myperiod.FirebaseAuthentication
 import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
 import components.CyclePhasesCard
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(navController: NavController) {
-    
+
     val firebaseAuthentication = FirebaseAuthentication()
     val firebaseDatabase = FirebaseDatabase()
 
+    var userId by remember { mutableStateOf("") }
     var isInPeriod by remember { mutableStateOf(false) }
-    val remainingDaysText = calculateRemainingDaysText(initialDate, frequencyDays)
+    var periodDaysText by remember { mutableStateOf("") }
+    var statusPeriodText by remember { mutableStateOf("") }
+    var dateEndPeriod by remember { mutableStateOf("") }
 
 
     fun navigateToLogin() {
@@ -65,27 +74,209 @@ fun Home(navController: NavController) {
         }
     }
 
-    fun calculateIsInPeriod() {
+
+    fun setStatusPeriodText() {
+        // Verifica si hay un período activo
+        if (isInPeriod) {
+            statusPeriodText = "Estás en periodo"
+        } else {
+            statusPeriodText = "Próximo periodo"
+        }
+
+    }
+
+    fun setIsInPeriod() {
         firebaseAuthentication.getCurrentUserUid()?.let { userId ->
             firebaseDatabase.getLastPeriodDate(userId) { lastPeriod ->
-                isInPeriod = lastPeriod?.end_date == null  // Actualiza isInPeriod según el end_date del último periodo
+                if (lastPeriod != null) {
+                    if (lastPeriod.end_date.isNullOrEmpty()) {
+                        // Si "end_date" es nulo o vacío, estamos en período
+                        isInPeriod = true
+                    } else {
+                        // Si "end_date" tiene valor, no estamos en período
+                        isInPeriod = false
+                    }
+                } else {
+                    // Si no hay ningún período registrado, no estamos en período
+                    isInPeriod = false
+                }
+                setStatusPeriodText()
+
             }
         } ?: run {
-            isInPeriod = false  // Si el usuario no está autenticado, se establece como false
+            // Si el usuario no está autenticado, se establece como false
+            isInPeriod = false
+            setStatusPeriodText()
+
         }
     }
 
 
+
+
+
+    fun setUserId() {
+        userId = firebaseAuthentication.getCurrentUserUid().toString()
+    }
+
+
+
+    fun parseDate(dateStr: String?): Date? {
+        if (dateStr.isNullOrEmpty()) return null
+
+        val formats = arrayOf(
+            "yyyy-MM-dd",
+            "dd/MM/yyyy"
+            // Agrega otros formatos si es necesario
+        )
+
+        for (formatStr in formats) {
+            try {
+                val format = SimpleDateFormat(formatStr, Locale.getDefault())
+                return format.parse(dateStr)
+            } catch (e: ParseException) {
+                // Continuar con el siguiente formato
+            }
+        }
+
+        return null
+    }
+
+    fun addDaysToDate(date: Date, days: Int): Date {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        calendar.add(Calendar.DAY_OF_YEAR, days)
+        return calendar.time
+    }
+
+
+
+    fun setPeriodDaysText() {
+        firebaseDatabase.fetchFrequencyDays(userId) { frequencyDays ->
+            firebaseDatabase.fetchInitialPeriodDate(userId) { initialDateStr ->
+                firebaseDatabase.getLastPeriodDate(userId) { lastPeriod ->
+                    val today = Calendar.getInstance().time
+
+                    if (lastPeriod == null) {
+                        // Caso 1: No hay registros en "periods", usar "period_initial_registered"
+                        if (initialDateStr != null) {
+                            val initialDate = parseDate(initialDateStr)
+                            if (initialDate != null) {
+                                val nextPeriodDate = addDaysToDate(initialDate, frequencyDays)
+                                val diffInDays = ((nextPeriodDate.time - today.time) / (1000 * 60 * 60 * 24)).toInt()
+                                val resultText = if (diffInDays > 0) {
+                                    "Faltan $diffInDays días"
+                                } else {
+                                    "Tarde ${-diffInDays} días"
+                                }
+                                periodDaysText = resultText
+                            } else {
+                                periodDaysText = "Error al parsear la fecha inicial"
+                            }
+                        } else {
+                            periodDaysText = "No hay fecha inicial registrada"
+                        }
+                    } else {
+                        // Caso 2: Hay registros en "periods", usar el último registro
+                        if (!lastPeriod.end_date.isNullOrEmpty()) {
+                            // Subcaso A: "end_date" no es nulo o vacío
+                            val endDate = parseDate(lastPeriod.end_date)
+                            if (endDate != null) {
+                                val nextPeriodDate = addDaysToDate(endDate, frequencyDays)
+                                val diffInDays = ((nextPeriodDate.time - today.time) / (1000 * 60 * 60 * 24)).toInt()
+                                val resultText = if (diffInDays > 0) {
+                                    "Faltan $diffInDays días"
+                                } else {
+                                    "Tarde ${-diffInDays} días"
+                                }
+                                periodDaysText = resultText
+                            } else {
+                                periodDaysText = "Error al parsear 'end_date' del último período"
+                            }
+                        } else {
+                            // Subcaso B: "end_date" es nulo o vacío, período en curso
+                            val startDate = parseDate(lastPeriod.start_date)
+                            if (startDate != null) {
+                                val diffInDays = ((today.time - startDate.time) / (1000 * 60 * 60 * 24)).toInt()
+                                periodDaysText = "$diffInDays días"
+                            } else {
+                                periodDaysText = "Error al parsear 'start_date' del período actual"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun formatDateToDayMonth(date: Date): String {
+        val format = SimpleDateFormat("dd 'de' MMMM", Locale("es", "ES"))
+        return format.format(date)
+    }
+
+    fun setDateEndPeriod() {
+        firebaseDatabase.fetchFrequencyDays(userId) { frequencyDays ->
+            firebaseDatabase.fetchAveragePeriodDays(userId) { averagePeriodDays ->
+                firebaseDatabase.fetchInitialPeriodDate(userId) { initialDateStr ->
+                    firebaseDatabase.getLastPeriodDate(userId) { lastPeriod ->
+                        val today = Calendar.getInstance().time
+
+                        if (isInPeriod) {
+                            // Caso 3: Período activo
+                            val startDate = parseDate(lastPeriod?.start_date)
+                            if (startDate != null) {
+                                val expectedEndDate = addDaysToDate(startDate, averagePeriodDays)
+                                val formattedDate = formatDateToDayMonth(expectedEndDate)
+                                dateEndPeriod = "Tu periodo debería finalizar el $formattedDate"
+                            } else {
+                                dateEndPeriod = "Error al obtener la fecha de inicio del período actual"
+                            }
+                        } else {
+                            // Caso 1 y 2: Sin período activo
+                            var referenceDate: Date? = null
+                            if (lastPeriod != null && !lastPeriod.end_date.isNullOrEmpty()) {
+                                // Usar el "end_date" del último período
+                                referenceDate = parseDate(lastPeriod.end_date)
+                            } else if (initialDateStr != null) {
+                                // Usar la fecha inicial registrada
+                                referenceDate = parseDate(initialDateStr)
+                            }
+
+                            if (referenceDate != null) {
+                                val nextExpectedPeriodDate = addDaysToDate(referenceDate, frequencyDays)
+                                if (today.after(nextExpectedPeriodDate)) {
+                                    // Caso 2: El período se está retrasando
+                                    dateEndPeriod = "Tu periodo se está retrasando"
+                                } else {
+                                    // Caso 1: Mostrar la fecha esperada
+                                    val formattedDate = formatDateToDayMonth(nextExpectedPeriodDate)
+                                    dateEndPeriod = formattedDate
+                                }
+                            } else {
+                                dateEndPeriod = "No hay fecha de referencia disponible"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+
+
     // LaunchedEffect to call calculateIsInPeriod when Home is displayed
     LaunchedEffect(Unit) {
-        calculateIsInPeriod()
+        setUserId()
+        setIsInPeriod()
+        setPeriodDaysText()
+        setDateEndPeriod()
     }
 
 
 
-    fun calculateRemainingDaysText(initialDate: Date, frequencyDays: Int): String {
-        return "Faltan $remainingDays días"
-    }
 
 
     var drawerState by remember { mutableStateOf(DrawerValue.Closed) }
@@ -126,73 +317,83 @@ fun Home(navController: NavController) {
             Spacer(modifier = Modifier.padding(16.dp))
             // "Próximo período" title
             Text(
-                text = "Próximo período",
+                text = statusPeriodText,
                 style = MaterialTheme.typography.bodyLarge, // Assuming bodyStrong is equivalent to bodyLarge
                 color = Color(0xFF49454F),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp),
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .testTag("statusPeriodText")
+
             )
             Spacer(modifier = Modifier.padding(8.dp))
 
 
             // Title in AE6BA4 color
             Text(
-                text = "Faltan 16 días", // Replace with your actual title
+                text = periodDaysText, // Replace with your actual title
                 style = MaterialTheme.typography.titleLarge, // Assuming titlePage is equivalent to titleLarge
                 color = Color(0xFFAE6BA4),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp),
                 fontSize = 48.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .testTag("periodDaysText")
 
             )
             Spacer(modifier = Modifier.padding(8.dp))
 
             // Title in Headline medium/font
             Text(
-                text = "25 octubre", // Replace with your actual title
+                text = dateEndPeriod, // Replace with your actual title
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = 28.sp,
                 color = Color(0xFF49454F),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .testTag("dateEndPeriod")
             )
 
             Spacer(modifier = Modifier.padding(26.dp))
 
-            // Button with pause icon
-            Button(
-                onClick = {
-                    firebaseAuthentication.logout()
-                    navigateToLogin()
-                },
-                modifier = Modifier
-                    .width(190.dp)
-                    .height(52.dp)
-                    .fillMaxWidth()
-                    .shadow(
-                        elevation = 3.dp,
-                        shape = CircleShape,
-                        clip = false
-                    ),
-                   // Apply clip to the Button composable
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
-            ){
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_pause_circle_24),
-                    contentDescription = "Pause",
-                    tint = Color(0xFF65558F),
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                )
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text(
-                    text = "Fin del período", // Replace with your actual button text
-                    style = MaterialTheme.typography.labelLarge,
-                    fontSize = 14.sp,
-                    color = Color(0xFF65558F)
-                )
+            if (isInPeriod) {
+                // Button with pause icon
+                Button(
+                    onClick = {
+                        firebaseAuthentication.logout()
+                        navigateToLogin()
+                    },
+                    modifier = Modifier
+                        .width(190.dp)
+                        .height(52.dp)
+                        .fillMaxWidth()
+                        .shadow(
+                            elevation = 3.dp,
+                            shape = CircleShape,
+                            clip = false
+                        )
+                        .testTag("finishPeriod"),
+                    // Apply clip to the Button composable
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_pause_circle_24),
+                        contentDescription = "Pause",
+                        tint = Color(0xFF65558F),
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                    )
+                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                    Text(
+                        text = "Fin del período", // Replace with your actual button text
+                        style = MaterialTheme.typography.labelLarge,
+                        fontSize = 14.sp,
+                        color = Color(0xFF65558F)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.padding(26.dp))
