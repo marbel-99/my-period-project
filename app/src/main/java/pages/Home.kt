@@ -46,6 +46,7 @@ import androidx.navigation.compose.rememberNavController
 import com.project.myperiod.FirebaseAuthentication
 import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
+import com.project.myperiod.ui.theme.MyPeriodTheme
 import components.CyclePhasesCard
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -66,6 +67,7 @@ fun Home(navController: NavController) {
     var periodDaysText by remember { mutableStateOf("") }
     var statusPeriodText by remember { mutableStateOf("") }
     var dateEndPeriod by remember { mutableStateOf("") }
+    var lastPeriodStartDate by remember { mutableStateOf("") }
 
 
     fun navigateToLogin() {
@@ -262,7 +264,18 @@ fun Home(navController: NavController) {
         }
     }
 
-
+    // Función para obtener la start_date del último período
+    fun fetchLastPeriodStartDate() {
+        firebaseAuthentication.getCurrentUserUid()?.let { userId ->
+            firebaseDatabase.getLastPeriodDate(userId) { lastPeriod ->
+                if (lastPeriod != null) {
+                    lastPeriodStartDate = lastPeriod.start_date ?: ""
+                } else {
+                    lastPeriodStartDate = ""
+                }
+            }
+        }
+    }
 
 
 
@@ -273,6 +286,7 @@ fun Home(navController: NavController) {
         setIsInPeriod()
         setPeriodDaysText()
         setDateEndPeriod()
+        fetchLastPeriodStartDate()
     }
 
 
@@ -296,6 +310,20 @@ fun Home(navController: NavController) {
                         Icon(
                             imageVector = Icons.Filled.Menu,
                             contentDescription = "Menu",
+                            tint = Color(0xFFAE6BA4)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            firebaseAuthentication.logout()
+                            navigateToLogin()
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_logout_24),
+                            contentDescription = "Logout",
                             tint = Color(0xFFAE6BA4)
                         )
                     }
@@ -358,14 +386,39 @@ fun Home(navController: NavController) {
                     .testTag("dateEndPeriod")
             )
 
-            Spacer(modifier = Modifier.padding(26.dp))
+            Spacer(modifier = Modifier.padding(36.dp))
+
+
+            CyclePhasesCard(startDate = lastPeriodStartDate)
+
+            Spacer(modifier = Modifier.padding(46.dp))
+
 
             if (isInPeriod) {
                 // Button with pause icon
                 Button(
                     onClick = {
-                        firebaseAuthentication.logout()
-                        navigateToLogin()
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val todayDate = dateFormat.format(Date())
+
+                        firebaseAuthentication.getCurrentUserUid()?.let { userId ->
+                            firebaseDatabase.setLastPeriodEndDate(userId, todayDate) { success ->
+                                if (success) {
+                                    // Actualiza el estado local
+                                    isInPeriod = false
+                                    setStatusPeriodText()
+                                    setPeriodDaysText()
+                                    setDateEndPeriod()
+                                    fetchLastPeriodStartDate()
+                                } else {
+                                    // Maneja el error (por ejemplo, muestra un mensaje al usuario)
+                                    println("Error al finalizar el período")
+                                }
+                            }
+                        } ?: run {
+                            // El usuario no está autenticado
+                            println("Usuario no autenticado")
+                        }
                     },
                     modifier = Modifier
                         .width(190.dp)
@@ -394,33 +447,50 @@ fun Home(navController: NavController) {
                         color = Color(0xFF65558F)
                     )
                 }
-            }
+            } else {
 
-            Spacer(modifier = Modifier.padding(26.dp))
+                Button(
+                    onClick = {
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val todayDate = dateFormat.format(Date())
 
-            CyclePhasesCard()
-
-            Spacer(modifier = Modifier.padding(16.dp))
-
-            // Button with add_period icon
-            Button(
-                onClick = { /* Handle button click */ },
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(82.dp)
-                    .shadow(
-                        elevation = 3.dp,
-                        shape = CircleShape, // Use CircleShape for circular button
-                        clip = false // Allow shadow to extend beyond button bounds
-                    ), // Add shadow with elevation 3.dp
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.add_period),
-                    contentDescription = "Add Period",
-                    tint = Color(0xFFAE6BA4), // You can adjust the icon color
-                    modifier = Modifier.size(500.dp) // Adjust icon size as needed
-                )
+                        firebaseAuthentication.getCurrentUserUid()?.let { userId ->
+                            firebaseDatabase.addNewPeriod(userId, todayDate) { success ->
+                                if (success) {
+                                    // Actualiza el estado local
+                                    isInPeriod = true
+                                    setStatusPeriodText()
+                                    setPeriodDaysText()
+                                    setDateEndPeriod()
+                                    fetchLastPeriodStartDate()
+                                } else {
+                                    // Maneja el error
+                                    println("Error al iniciar el período")
+                                }
+                            }
+                        } ?: run {
+                            // El usuario no está autenticado
+                            println("Usuario no autenticado")
+                        }
+                    },
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(82.dp)
+                        .shadow( // Add shadow with elevation 3.dp
+                            elevation = 3.dp,
+                            shape = CircleShape, // Use CircleShape for circular button
+                            clip = false // Allow shadow to extend beyond button bounds
+                        )
+                        .testTag("startPeriod"),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.add_period),
+                        contentDescription = "Add Period",
+                        tint = Color(0xFFAE6BA4), // You can adjust the icon color
+                        modifier = Modifier.size(500.dp) // Adjust icon size as needed
+                    )
+                }
             }
         }
     }
@@ -429,6 +499,10 @@ fun Home(navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
-    val navController = rememberNavController()
-    Home(navController)
+
+    MyPeriodTheme {
+        Home(
+            navController = rememberNavController()
+        )
+    }
 }

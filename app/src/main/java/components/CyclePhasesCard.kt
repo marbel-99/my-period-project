@@ -26,17 +26,57 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.project.myperiod.R
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 
 @Composable
-fun CyclePhasesCard() {
+fun CyclePhasesCard(startDate: String) {
+    // Funciones auxiliares
+    fun parseDate(dateStr: String): Date? {
+        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return try {
+            format.parse(dateStr)
+        } catch (e: ParseException) {
+            null
+        }
+    }
+
+    fun addDaysToDate(date: Date, days: Int): Date {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        calendar.add(Calendar.DAY_OF_YEAR, days)
+        return calendar.time
+    }
+
+    fun formatDateToDayMonth(date: Date): String {
+        val format = SimpleDateFormat("d MMMM", Locale("es", "ES"))
+        return format.format(date)
+    }
+
+    // Cálculos
+    val startDateObj = parseDate(startDate)
+    val ovulationDate = startDateObj?.let { addDaysToDate(it, 14) }
+    val fertileStartDate = ovulationDate?.let { addDaysToDate(it, -3) }
+    val fertileEndDate = ovulationDate?.let { addDaysToDate(it, 3) }
+
+    val ovulationDateStr = ovulationDate?.let { formatDateToDayMonth(it) } ?: "N/A"
+    val fertileStartDateStr = fertileStartDate?.let { formatDateToDayMonth(it) } ?: "N/A"
+    val fertileEndDateStr = fertileEndDate?.let { formatDateToDayMonth(it) } ?: "N/A"
+
+    val fertileDateRange = "$fertileStartDateStr - $fertileEndDateStr"
+
+    // Componente UI
     Card(
         modifier = Modifier
             .width(367.dp)
             .height(195.dp),
 
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(16.dp), // Add rounded corners
+        shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, Color(0xFFCAC4D0))
 
     ) {
@@ -57,18 +97,19 @@ fun CyclePhasesCard() {
                 PhaseCard(
                     painter = painterResource(id = R.drawable.fertility),
                     title = "Período fértil",
-                    dateRange = "7-10 oct."
+                    dateRange = fertileDateRange
                 )
 
                 PhaseCard(
                     painter = painterResource(id = R.drawable.ovulation),
                     title = "Ovulación",
-                    dateRange = "14-17 oct."
+                    dateRange = ovulationDateStr
                 )
             }
         }
     }
 }
+
 
 @Composable
 fun PhaseCard(painter: Painter, title: String, dateRange: String) {
@@ -109,5 +150,5 @@ fun PhaseCard(painter: Painter, title: String, dateRange: String) {
 @Preview(showBackground = true)
 @Composable
 fun CyclePhasesCardPreview() {
-    CyclePhasesCard()
+    CyclePhasesCard("yyyy-MM-dd")
 }

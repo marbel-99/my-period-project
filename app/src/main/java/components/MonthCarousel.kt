@@ -1,6 +1,7 @@
 package components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -131,7 +132,7 @@ fun CalendarView(
 ) {
     val daysInMonth = YearMonth.of(currentYear, currentMonth).lengthOfMonth()
     val firstDayOfMonth = YearMonth.of(currentYear, currentMonth).atDay(1)
-    val startDayOfWeek = firstDayOfMonth.dayOfWeek.value % 7 // Ajuste para que domingo sea 0
+    val startDayOfWeek = (firstDayOfMonth.dayOfWeek.value + 6) % 7 // Ajuste para que lunes sea 0
 
     // Encabezados de los días de la semana
     val diasDeLaSemana = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom")
@@ -166,12 +167,20 @@ fun CalendarView(
         }
 
         // Mostrar los días del mes
-        items(daysInMonth) { day -> // Cambiado a items
+        items(daysInMonth) { day ->
             val dayOfMonth = day + 1
+            val isSelected = selectedDay.dayOfMonth == dayOfMonth &&
+                    selectedDay.monthValue == currentMonth &&
+                    selectedDay.year == currentYear
+
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .border(1.dp, Color.Gray)
+                    .background(
+                        color = if (isSelected) Color(0xFFECE6F0) else Color.Transparent,
+                        shape = androidx.compose.foundation.shape.CircleShape
+                    )
                     .clickable {
                         val selectedDate = LocalDate.of(currentYear, currentMonth, dayOfMonth)
                         onDaySelected(selectedDate)
@@ -181,8 +190,8 @@ fun CalendarView(
                 Text(
                     text = "$dayOfMonth",
                     style = TextStyle(
-                        fontWeight = if (selectedDay.dayOfMonth == dayOfMonth && selectedDay.monthValue == currentMonth) FontWeight.Bold else FontWeight.Normal,
-                        color = if (selectedDay.dayOfMonth == dayOfMonth && selectedDay.monthValue == currentMonth) Color(0xFFAE6BA4) else Color.Black,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isSelected) Color(0xFFAE6BA4) else Color.Black,
                         fontSize = 16.sp
                     ),
                     textAlign = TextAlign.Center
@@ -200,7 +209,7 @@ fun CalendarView(
 fun MonthCarouselPreview() {
     MonthCarousel(
         selectedMonth = 1, // January
-        selectedYear = 2023,
+        selectedYear = 2024,
         onMonthSelected = { month, year -> println("Month selected: $month, Year selected: $year") },
         onDaySelected = { day -> println("Day selected: $day") }
     )

@@ -38,8 +38,8 @@ import java.time.LocalDate
 
 @Composable
 fun Formulario3(navController: NavHostController) {
-    var selectedMonth by remember { mutableStateOf(10) } // Default to October
-    var selectedYear by remember { mutableStateOf(2024) } // Default to 2024
+    var selectedMonth by remember { mutableStateOf(LocalDate.now().monthValue) } // Default to actual month
+    var selectedYear by remember { mutableStateOf(LocalDate.now().year) } // Default to actual year
     var selectedDay by remember { mutableStateOf(LocalDate.now()) } // Default to today
     val firebaseDatabase = FirebaseDatabase()
     val firebaseAuthentication = FirebaseAuthentication()
@@ -87,7 +87,7 @@ fun Formulario3(navController: NavHostController) {
             Spacer(modifier = Modifier.padding(16.dp))
 
             Text(
-                text = "¿Cuándo comenzó tu último período?",
+                text = "¿Cuándo terminó tu último período?",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color(0xFF49454F),

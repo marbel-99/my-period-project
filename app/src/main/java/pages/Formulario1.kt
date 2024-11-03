@@ -41,7 +41,7 @@ import components.DayCarousel
 
 @Composable
 fun Formulario1(navController: NavHostController) {
-    var selectedDays by remember { mutableIntStateOf(28) } // Default value
+    var selectedDays by remember { mutableIntStateOf(7) } // Default value
     val firebaseDatabase = FirebaseDatabase()
     val firebaseAuthentication = FirebaseAuthentication()
 

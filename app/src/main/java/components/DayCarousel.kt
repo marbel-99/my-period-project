@@ -1,27 +1,18 @@
 package components
 
-import androidx.activity.result.launch
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-
-import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -47,15 +38,22 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
-    val daysList = (1..31).toList() // Range of days
-    val pagerState = rememberPagerState( )
+    val daysList = (1..31).toList() // Rango de días
+    val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
 
+    // Sincronizar el estado inicial del pager con el día seleccionado
     LaunchedEffect(selectedDays) {
         val index = daysList.indexOf(selectedDays)
-        if (index != -1) {
+        if (index != -1 && index != pagerState.currentPage) {
             pagerState.scrollToPage(index)
         }
+    }
+
+    // Actualizar selectedDays cuando el usuario cambia de página
+    LaunchedEffect(pagerState.currentPage) {
+        val newSelectedDay = daysList[pagerState.currentPage]
+        onDaysSelected(newSelectedDay)
     }
 
     Box(
@@ -188,5 +186,5 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun DayCarouselPreview() {
-    DayCarousel(selectedDays = 28, onDaysSelected = {})
+    DayCarousel(selectedDays = 22, onDaysSelected = {})
 }

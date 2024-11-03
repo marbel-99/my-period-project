@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.project.myperiod.FirebaseAuthentication
-import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
 import kotlinx.coroutines.launch
 
@@ -60,7 +59,6 @@ fun LoginScreen(navController: NavHostController)  {
     var passwordVisible by remember { mutableStateOf(false) }
     val isUserNotFound by remember { mutableStateOf(false) }
     var showPopup by remember { mutableStateOf(false) }
-    val firebaseDatabase = FirebaseDatabase()
     val firebaseAuthentication = FirebaseAuthentication()
 
     val coroutineScope = rememberCoroutineScope()
@@ -75,19 +73,6 @@ fun LoginScreen(navController: NavHostController)  {
         navController.navigate("registration")
     }
 
-    fun getCitiesList() {
-        try {
-            firebaseDatabase.getCities { cities ->
-                dialogTitle.value = "Cities Dialog"
-                val city = cities.last()
-                dialogBody.value = "City ID: ${city.id}, City Name: ${city.name}"
-                showPopup = true
-            }
-        } catch (e: Exception) {
-            // Handle error, e.g., log it or display an error message
-            Log.e("LoginScreen", "Error fetching city names", e)
-        }
-    }
 
     fun showPopup(title: String?, message: String?) {
         if (title != null && message != null) {
@@ -139,7 +124,7 @@ fun LoginScreen(navController: NavHostController)  {
                 username = it
                 isUsernameValid = it.isNotBlank()
                             },
-            label = { Text("Nombre de usuario o email", color = Color(0xFF65558F)) },
+            label = { Text("Email del usuario", color = Color(0xFF65558F)) },
             leadingIcon = {
                 Icon(
                     painter =  painterResource(id = R.drawable.baseline_person_3_24),
