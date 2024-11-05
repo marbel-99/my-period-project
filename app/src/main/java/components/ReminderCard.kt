@@ -51,18 +51,18 @@ fun ReminderCard(    selectedDay: LocalDate,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .background(Color(0xFFFEF7FF)) // Background color of the card
+            .background(Color(0xFFFEF7FF))
             .shadow(
                 elevation = 4.dp,
-                spotColor = Color.Black, // Adjust color if needed
-                ambientColor = Color.Black, // Adjust color if needed
+                spotColor = Color.Black,
+                ambientColor = Color.Black,
                 shape = RoundedCornerShape(16.dp),
                 clip = false
             ),
         colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent // Make the card background transparent
+            containerColor = Color.Transparent
         ),
-        shape = RoundedCornerShape(16.dp), // Rounded corners
+        shape = RoundedCornerShape(16.dp),
     ){
         Row(
             modifier = Modifier
@@ -71,12 +71,12 @@ fun ReminderCard(    selectedDay: LocalDate,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Bell Icon with Plus
+
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFEADDFF)), // Background color of the circle
+                    .background(Color(0xFFEADDFF)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -86,14 +86,14 @@ fun ReminderCard(    selectedDay: LocalDate,
 
             }
 
-            // Title
+
             Text(
                 text = "Recuérdame",
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.Black // Text color
             )
 
-            // Switch
+
             Switch(
                 checked = isReminderEnabled,
                 onCheckedChange = { isChecked ->
@@ -102,10 +102,6 @@ fun ReminderCard(    selectedDay: LocalDate,
                         // Connect to the device's calendar and activate a reminder
                         val calendarIntent = createCalendarIntent(context, selectedDay, selectedMonth, selectedYear)
                         ContextCompat.startActivity(context, calendarIntent, null)
-                    } else {
-                        // Deactivate the reminder
-                        // You'll need to implement the logic to remove or cancel
-                        // the reminder from the device's calendar.
                     }
                 },
                 colors = SwitchDefaults.colors(

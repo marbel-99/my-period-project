@@ -41,7 +41,7 @@ import components.DayCarousel
 
 @Composable
 fun Formulario2(navController: NavHostController) {
-    var selectedDays by remember { mutableIntStateOf(28) } // Default value
+    var selectedDays by remember { mutableIntStateOf(28) }
     val firebaseDatabase = FirebaseDatabase()
     val firebaseAuthentication = FirebaseAuthentication()
 
@@ -56,7 +56,7 @@ fun Formulario2(navController: NavHostController) {
             // Progress Bar
             LinearProgressIndicator(
                 progress = {
-                    0.45f // Adjust progress value
+                    0.45f
                 },
                 modifier = Modifier
                     .width(280.dp)
@@ -80,7 +80,7 @@ fun Formulario2(navController: NavHostController) {
             }
         }
 
-        // Content with Background
+
         Column(modifier = Modifier
             .fillMaxSize()
 
@@ -101,9 +101,9 @@ fun Formulario2(navController: NavHostController) {
 
             Spacer(modifier = Modifier.padding( 20.dp))
 
-            // Calendar Image
+
             Image(
-                painter = painterResource(id = R.drawable.vulva_formulary2), // Replace with your calendar image
+                painter = painterResource(id = R.drawable.vulva_formulary2),
                 contentDescription = "Calendar",
                 modifier = Modifier
                     .size(300.dp)
@@ -141,5 +141,5 @@ fun Formulario2(navController: NavHostController) {
 @Composable
 fun Formulario2Preview() {
     val navController = rememberNavController()
-    Formulario2(navController = navController) // Provide an empty lambda for onLogin
+    Formulario2(navController = navController)
 }

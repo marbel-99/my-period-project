@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.project.myperiod.FirebaseAuthentication
-import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
 import kotlinx.coroutines.launch
 
@@ -57,7 +56,6 @@ fun RegistrationScreen(navController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
     var email by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
-    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isUsernameValid by remember { mutableStateOf(true) }
     var isPasswordValid by remember { mutableStateOf(true) }
@@ -69,26 +67,8 @@ fun RegistrationScreen(navController: NavHostController) {
         Text("Este usuario ya está registrado", color = Color.Red, modifier = Modifier.padding(8.dp))
     }
 
-    val firebaseDatabase = FirebaseDatabase()
     val firebaseAuthentication = FirebaseAuthentication()
 
-    val onRegister = {
-//        val user = auth.currentUser // Get the currently authenticated user
-//        if (user != null) {
-//            val userId = user.uid
-//            val userData = HashMap<String, Any>()
-//            userData["email"] = email
-//            userData["username"] = username
-//
-//
-//            database.reference.child("users").child(userId).setValue(userData)
-//                .addOnSuccessListener {
-//                    // Data saved successfully
-//                    navController.navigate("formulario1") // Navigate to Formulario1
-//                }
-//
-//        }
-    }
 
     fun navigateToFormulario1() {
         navController.navigate("formulario1") {
@@ -111,7 +91,7 @@ fun RegistrationScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Título
+
         Text(
             text = "Nueva cuenta",
             color = Color(0xFF000000),
@@ -121,20 +101,20 @@ fun RegistrationScreen(navController: NavHostController) {
             modifier = Modifier.padding(bottom = 50.dp)
         )
 
-        Spacer(modifier = Modifier.height(10.dp)) // Espacio entre el título y la imagen
+        Spacer(modifier = Modifier.height(10.dp))
 
-        // Imagen del logo
+
         Image(
-            painter = painterResource(id = R.drawable.avatar_user), // Reemplaza con tu recurso de imagen
+            painter = painterResource(id = R.drawable.avatar_user),
             contentDescription = "Logo de Usuario",
             modifier = Modifier
                 .size(120.dp)
                 .padding(bottom = 20.dp)
         )
 
-        Spacer(modifier = Modifier.height(10.dp)) // Espacio entre la imagen y los botones
+        Spacer(modifier = Modifier.height(10.dp))
 
-        Spacer(modifier = Modifier.height(10.dp)) // Espacio entre los botones
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = email,
@@ -162,26 +142,6 @@ fun RegistrationScreen(navController: NavHostController) {
 
         )
 
-
-//        OutlinedTextField(
-//            value = username,
-//            onValueChange = {
-//                username = it
-//                isUsernameValid = it.isNotBlank()
-//                            },
-//            label = { Text("Nombre de usuario", color = Color(0xFF65558F)) },
-//            leadingIcon = {
-//                Icon(
-//                    painter =  painterResource(id = R.drawable.baseline_person_3_24),
-//                    contentDescription = "Person Icon"
-//                )
-//            },
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(16.dp)
-//        )
-
-        // Password Input
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -213,7 +173,7 @@ fun RegistrationScreen(navController: NavHostController) {
             value = repeatPassword,
             onValueChange = {
                 repeatPassword = it
-                isRepeatPasswordValid = it == password // Check if passwords match
+                isRepeatPasswordValid = it == password
             },
             label = { Text("Repita su contraseña", color = Color(0xFF65558F)) },
             leadingIcon = {
@@ -231,8 +191,8 @@ fun RegistrationScreen(navController: NavHostController) {
                 }
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            isError = !isRepeatPasswordValid, // Show error state if passwords don't match
-            supportingText = { // Display error message
+            isError = !isRepeatPasswordValid,
+            supportingText = {
                 if (!isRepeatPasswordValid) {
                     Text("Las contraseñas no coinciden", color = Color.Red)
                 }

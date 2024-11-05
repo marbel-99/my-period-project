@@ -35,7 +35,7 @@ import java.util.Locale
 
 @Composable
 fun CyclePhasesCard(startDate: String) {
-    // Funciones auxiliares
+    // Auxiliars functions
     fun parseDate(dateStr: String): Date? {
         val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return try {
@@ -57,7 +57,7 @@ fun CyclePhasesCard(startDate: String) {
         return format.format(date)
     }
 
-    // Cálculos
+    // Calculate
     val startDateObj = parseDate(startDate)
     val ovulationDate = startDateObj?.let { addDaysToDate(it, 14) }
     val fertileStartDate = ovulationDate?.let { addDaysToDate(it, -3) }
@@ -69,7 +69,7 @@ fun CyclePhasesCard(startDate: String) {
 
     val fertileDateRange = "$fertileStartDateStr - $fertileEndDateStr"
 
-    // Componente UI
+    // Components UI
     Card(
         modifier = Modifier
             .width(367.dp)
@@ -118,7 +118,7 @@ fun PhaseCard(painter: Painter, title: String, dateRange: String) {
             .width(174.dp)
             .height(124.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF7FF)),
-        shape = RoundedCornerShape(16.dp), // Add rounded corners
+        shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, Color(0xFFCAC4D0))
     ) {
         Column(modifier = Modifier.padding(start = 16.dp)) {
@@ -126,7 +126,7 @@ fun PhaseCard(painter: Painter, title: String, dateRange: String) {
                 painter = painter,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(26.dp, 62.dp) // Adjust icon size as needed
+                    .size(26.dp, 62.dp)
                     .align(Alignment.Start)
             )
 

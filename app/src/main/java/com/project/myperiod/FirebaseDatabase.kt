@@ -31,13 +31,11 @@ class FirebaseDatabase {
       ValueEventListener {
       override fun onDataChange(snapshot: DataSnapshot) {
         if (snapshot.exists()) {
-          // Itera sobre los hijos (debería ser solo uno debido a limitToLast(1))
           for (childSnapshot in snapshot.children) {
             val lastRecord = childSnapshot.getValue(Period::class.java)
             callback.invoke(lastRecord)
           }
         } else {
-          // No se encontraron registros
           callback.invoke(null)
         }
       }
@@ -107,7 +105,6 @@ class FirebaseDatabase {
   fun addNewPeriod(userId: String, startDate: String, callback: (Boolean) -> Unit) {
     val periodsRef = myPeriodDatabase.child("periods").child(userId)
 
-    // Obtener la última clave numérica
     periodsRef.orderByKey().limitToLast(1).addListenerForSingleValueEvent(object : ValueEventListener {
       override fun onDataChange(snapshot: DataSnapshot) {
         var newKey = 1
@@ -119,11 +116,10 @@ class FirebaseDatabase {
             }
           }
         }
-        // Añadir el nuevo período
         val newPeriodRef = periodsRef.child(newKey.toString())
         val periodData = mapOf(
           "start_date" to startDate,
-          "end_date" to "" // end_date vacío
+          "end_date" to ""
         )
         newPeriodRef.setValue(periodData)
           .addOnSuccessListener {

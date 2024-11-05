@@ -30,12 +30,10 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavHostController) {
-    // Importa las fuentes personalizadas
     val arbutusSlab = FontFamily(Font(R.font.arbutus_slab_regular))
     val aoboshiOne = FontFamily(Font(R.font.aoboshi_one_regular))
     val firebaseAuth = FirebaseAuthentication()
 
-    // Pantalla principal con fondo blanco
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -49,36 +47,35 @@ fun SplashScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
-            // Imagen en la parte superior
+
             Image(
-                painter = painterResource(id = R.drawable.splash_image), // Usa el ID correcto de tu imagen
+                painter = painterResource(id = R.drawable.splash_image),
                 contentDescription = "Logo",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp) // Ajusta la altura según sea necesario
+                    .height(250.dp)
             )
 
-            // Texto principal "My Period"
+
             BasicText(
                 text = "My Period",
                 style = TextStyle(
                     fontFamily = arbutusSlab,
                     fontWeight = FontWeight.Normal,
                     fontSize = 48.sp,
-                    color = Color(0xFFAE6BA4) // Color: AE6BA4
+                    color = Color(0xFFAE6BA4)
                 ),
                 modifier = Modifier.padding(top = 250.dp)
             )
 
-            // Subtítulo "Haz de tu autocuidado una prioridad"
             BasicText(
                 text = "Haz de tu autocuidado una prioridad",
                 style = TextStyle(
                     fontFamily = aoboshiOne,
                     fontWeight = FontWeight.Normal,
                     fontSize = 17.sp,
-                    color = Color(0xFF2B2B2B) // Color: 2B2B2B
+                    color = Color(0xFF2B2B2B)
                 ),
                 modifier = Modifier.padding(bottom = 20.dp, top = 80.dp)
             )
@@ -89,11 +86,11 @@ fun SplashScreen(navController: NavHostController) {
         delay(2000) // Delay for 2 seconds
         if (firebaseAuth.isUserLoggedIn) {
             navController.navigate("home") {
-                popUpTo(route = "splash") { inclusive = true } // Remove splash screen from back stack
+                popUpTo(route = "splash") { inclusive = true }
             }
         } else {
             navController.navigate("login") {
-                popUpTo(route = "splash") { inclusive = true } // Remove splash screen from back stack
+                popUpTo(route = "splash") { inclusive = true }
             }
         }
 

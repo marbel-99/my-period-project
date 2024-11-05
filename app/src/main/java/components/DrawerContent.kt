@@ -30,14 +30,14 @@ fun DrawerContent(userName: String) {
             .background(Color(0xFFF3EDF7))
             .padding(16.dp)
     ) {
-        // Avatar and User Name
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = R.drawable.generic_avatar), // Replace with your avatar image
+                painter = painterResource(id = R.drawable.generic_avatar),
                 contentDescription = "Avatar",
                 modifier = Modifier.size(48.dp)
             )
@@ -46,8 +46,6 @@ fun DrawerContent(userName: String) {
                 style = MaterialTheme.typography.bodyLarge
             )
         }
-
-        // Menu Items
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Calendario", style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(8.dp))

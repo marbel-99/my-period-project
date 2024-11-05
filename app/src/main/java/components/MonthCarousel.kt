@@ -59,7 +59,6 @@ fun MonthCarousel(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Row with arrows and month/year display
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -109,8 +108,6 @@ fun MonthCarousel(
                 )
             }
         }
-
-        // Calendar that updates based on month/year selection
         CalendarView(
             currentMonth = currentMonth,
             currentYear = currentYear,
@@ -132,16 +129,15 @@ fun CalendarView(
 ) {
     val daysInMonth = YearMonth.of(currentYear, currentMonth).lengthOfMonth()
     val firstDayOfMonth = YearMonth.of(currentYear, currentMonth).atDay(1)
-    val startDayOfWeek = (firstDayOfMonth.dayOfWeek.value + 6) % 7 // Ajuste para que lunes sea 0
+    //Adjust to monday was 0
+    val startDayOfWeek = (firstDayOfMonth.dayOfWeek.value + 6) % 7
 
-    // Encabezados de los días de la semana
     val diasDeLaSemana = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom")
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(7),
         contentPadding = PaddingValues(0.dp)
     ) {
-        // Agregar los encabezados de los días de la semana
         items(diasDeLaSemana.size) { index ->
             Box(
                 modifier = Modifier
@@ -157,7 +153,6 @@ fun CalendarView(
             }
         }
 
-        // Espacios vacíos para los días antes del primer día del mes
         items(startDayOfWeek) {
             Box(
                 modifier = Modifier
@@ -166,7 +161,6 @@ fun CalendarView(
             )
         }
 
-        // Mostrar los días del mes
         items(daysInMonth) { day ->
             val dayOfMonth = day + 1
             val isSelected = selectedDay.dayOfMonth == dayOfMonth &&
@@ -208,7 +202,7 @@ fun CalendarView(
 @Composable
 fun MonthCarouselPreview() {
     MonthCarousel(
-        selectedMonth = 1, // January
+        selectedMonth = 1,
         selectedYear = 2024,
         onMonthSelected = { month, year -> println("Month selected: $month, Year selected: $year") },
         onDaySelected = { day -> println("Day selected: $day") }

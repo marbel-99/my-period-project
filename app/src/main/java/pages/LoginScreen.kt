@@ -90,7 +90,7 @@ fun LoginScreen(navController: NavHostController)  {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Título
+
         Text(
             text = "Iniciar Sesión",
             color = Color(0xFF000000),
@@ -100,23 +100,22 @@ fun LoginScreen(navController: NavHostController)  {
             modifier = Modifier.padding(bottom = 50.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp)) // Espacio entre el título y la imagen
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Imagen del logo
+
         Image(
-            painter = painterResource(id = R.drawable.avatar_user), // Reemplaza con tu recurso de imagen
+            painter = painterResource(id = R.drawable.avatar_user),
             contentDescription = "Logo de Usuario",
             modifier = Modifier
                 .size(190.dp)
                 .padding(bottom = 50.dp)
         )
 
-        Spacer(modifier = Modifier.height(32.dp)) // Espacio entre la imagen y los botones
+        Spacer(modifier = Modifier.height(32.dp))
 
 
 
-        Spacer(modifier = Modifier.height(10.dp)) // Espacio entre los botones
-
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = username,
@@ -136,7 +135,7 @@ fun LoginScreen(navController: NavHostController)  {
                 .padding(16.dp)
         )
 
-        // Password Input
+
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -175,12 +174,12 @@ fun LoginScreen(navController: NavHostController)  {
                     val onFailure = { exception: Exception ->
                         Log.e("LoginScreen", exception.toString(), exception)
                         showPopup("Error", exception.message ?: "Unknown error")
-                        Unit
+
                     }
                     if (username.isNotEmpty() && password.isNotEmpty()) {
                         firebaseAuthentication.loginWithEmailAndPassword(username.trim(), password.trim(), onSuccess, onFailure)
                     } else {
-                        // Avisa al usuario de que es null
+
                         showPopup("Hay un error", "Por favor, ingresa un nombre de usuario y una contraseña")
                     }
                 }
@@ -252,5 +251,5 @@ fun LoginScreen(navController: NavHostController)  {
 @Composable
 fun LoginScreenPreview() {
     val navController = rememberNavController()
-    LoginScreen(navController = navController) // Provide an empty lambda for onLogin)
+    LoginScreen(navController = navController)
 }

@@ -78,8 +78,6 @@ fun Formulario4(navController: NavHostController) {
         }
 
 
-
-        // Content with Background
         Column(modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF4F4F4))
@@ -87,7 +85,7 @@ fun Formulario4(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.padding(16.dp))
-            // Title
+
             Text(
                 text = "¿Establecer un recordatorio?",
                 textAlign = TextAlign.Center,
@@ -108,7 +106,7 @@ fun Formulario4(navController: NavHostController) {
             Spacer(modifier = Modifier.padding(16.dp))
 
             Image(
-                painter = painterResource(id = R.drawable.campana), // Replace with your calendar image
+                painter = painterResource(id = R.drawable.campana),
                 contentDescription = "Calendar",
                 modifier = Modifier
                     .size(300.dp)
@@ -120,8 +118,6 @@ fun Formulario4(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    // Aquí puedes guardar selectedDay en tu base de datos o estado
-                    // ...
                     navController.navigate("home")
                 },
                 modifier = Modifier
@@ -139,5 +135,5 @@ fun Formulario4(navController: NavHostController) {
 @Composable
 fun Formulario4Preview() {
     val navController = rememberNavController()
-    Formulario4(navController = navController) // Provide an empty lambda for onLogin
+    Formulario4(navController = navController)
 }

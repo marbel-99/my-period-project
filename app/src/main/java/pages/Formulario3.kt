@@ -38,9 +38,9 @@ import java.time.LocalDate
 
 @Composable
 fun Formulario3(navController: NavHostController) {
-    var selectedMonth by remember { mutableStateOf(LocalDate.now().monthValue) } // Default to actual month
-    var selectedYear by remember { mutableStateOf(LocalDate.now().year) } // Default to actual year
-    var selectedDay by remember { mutableStateOf(LocalDate.now()) } // Default to today
+    var selectedMonth by remember { mutableStateOf(LocalDate.now().monthValue) }
+    var selectedYear by remember { mutableStateOf(LocalDate.now().year) }
+    var selectedDay by remember { mutableStateOf(LocalDate.now()) }
     val firebaseDatabase = FirebaseDatabase()
     val firebaseAuthentication = FirebaseAuthentication()
 
@@ -77,7 +77,6 @@ fun Formulario3(navController: NavHostController) {
             }
         }
 
-        // Content with Background
         Column(modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF4F4F4))
@@ -130,5 +129,5 @@ fun Formulario3(navController: NavHostController) {
 @Composable
 fun Formulario3Preview() {
     val navController = rememberNavController()
-    Formulario3(navController = navController) // Provide an empty lambda for onLogin
+    Formulario3(navController = navController)
 }

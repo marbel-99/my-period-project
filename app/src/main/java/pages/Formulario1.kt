@@ -58,7 +58,7 @@ fun Formulario1(navController: NavHostController) {
             // Progress Bar
             LinearProgressIndicator(
                 progress = {
-                    0.25f // Adjust progress value
+                    0.25f
                 },
                 modifier = Modifier
                     .width(280.dp)
@@ -82,7 +82,6 @@ fun Formulario1(navController: NavHostController) {
             }
         }
 
-        // Content with Background
         Column(modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF4F4F4))
@@ -103,9 +102,9 @@ fun Formulario1(navController: NavHostController) {
 
             Spacer(modifier = Modifier.padding( 16.dp))
 
-            // Calendar Image
+
             Image(
-                painter = painterResource(id = R.drawable.calendar_formulary1), // Replace with your calendar image
+                painter = painterResource(id = R.drawable.calendar_formulary1),
                 contentDescription = "Calendar",
                 modifier = Modifier
                     .size(400.dp)
@@ -141,5 +140,5 @@ fun Formulario1(navController: NavHostController) {
 @Composable
 fun Formulario1Preview() {
     val navController = rememberNavController()
-    Formulario1(navController = navController) // Provide an empty lambda for onLogin
+    Formulario1(navController = navController)
 }

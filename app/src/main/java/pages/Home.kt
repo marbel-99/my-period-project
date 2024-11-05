@@ -72,13 +72,13 @@ fun Home(navController: NavController) {
 
     fun navigateToLogin() {
         navController.navigate("login") {
-            popUpTo(route = "home") { inclusive = true } // Remove splash screen from back stack
+            popUpTo(route = "home") { inclusive = true }
         }
     }
 
 
     fun setStatusPeriodText() {
-        // Verifica si hay un período activo
+
         if (isInPeriod) {
             statusPeriodText = "Estás en periodo"
         } else {
@@ -92,21 +92,21 @@ fun Home(navController: NavController) {
             firebaseDatabase.getLastPeriodDate(userId) { lastPeriod ->
                 if (lastPeriod != null) {
                     if (lastPeriod.end_date.isNullOrEmpty()) {
-                        // Si "end_date" es nulo o vacío, estamos en período
+
                         isInPeriod = true
                     } else {
-                        // Si "end_date" tiene valor, no estamos en período
+
                         isInPeriod = false
                     }
                 } else {
-                    // Si no hay ningún período registrado, no estamos en período
+
                     isInPeriod = false
                 }
                 setStatusPeriodText()
 
             }
         } ?: run {
-            // Si el usuario no está autenticado, se establece como false
+
             isInPeriod = false
             setStatusPeriodText()
 
@@ -129,7 +129,7 @@ fun Home(navController: NavController) {
         val formats = arrayOf(
             "yyyy-MM-dd",
             "dd/MM/yyyy"
-            // Agrega otros formatos si es necesario
+
         )
 
         for (formatStr in formats) {
@@ -137,7 +137,7 @@ fun Home(navController: NavController) {
                 val format = SimpleDateFormat(formatStr, Locale.getDefault())
                 return format.parse(dateStr)
             } catch (e: ParseException) {
-                // Continuar con el siguiente formato
+
             }
         }
 
@@ -160,7 +160,8 @@ fun Home(navController: NavController) {
                     val today = Calendar.getInstance().time
 
                     if (lastPeriod == null) {
-                        // Caso 1: No hay registros en "periods", usar "period_initial_registered"
+
+                        // Case 1: No records in "periods", use "period_initial_registered"
                         if (initialDateStr != null) {
                             val initialDate = parseDate(initialDateStr)
                             if (initialDate != null) {
@@ -179,9 +180,10 @@ fun Home(navController: NavController) {
                             periodDaysText = "No hay fecha inicial registrada"
                         }
                     } else {
-                        // Caso 2: Hay registros en "periods", usar el último registro
+                        // Case 2: There are records in "periods", use the last record
                         if (!lastPeriod.end_date.isNullOrEmpty()) {
-                            // Subcaso A: "end_date" no es nulo o vacío
+
+                            // Subcase A: "end_date" is not null or empty
                             val endDate = parseDate(lastPeriod.end_date)
                             if (endDate != null) {
                                 val nextPeriodDate = addDaysToDate(endDate, frequencyDays)
@@ -196,7 +198,7 @@ fun Home(navController: NavController) {
                                 periodDaysText = "Error al parsear 'end_date' del último período"
                             }
                         } else {
-                            // Subcaso B: "end_date" es nulo o vacío, período en curso
+                            // Subcase B: "end_date" is null or empty, current period
                             val startDate = parseDate(lastPeriod.start_date)
                             if (startDate != null) {
                                 val diffInDays = ((today.time - startDate.time) / (1000 * 60 * 60 * 24)).toInt()
@@ -224,7 +226,7 @@ fun Home(navController: NavController) {
                         val today = Calendar.getInstance().time
 
                         if (isInPeriod) {
-                            // Caso 3: Período activo
+                            // Case 3: Active period
                             val startDate = parseDate(lastPeriod?.start_date)
                             if (startDate != null) {
                                 val expectedEndDate = addDaysToDate(startDate, averagePeriodDays)
@@ -234,23 +236,24 @@ fun Home(navController: NavController) {
                                 dateEndPeriod = "Error al obtener la fecha de inicio del período actual"
                             }
                         } else {
-                            // Caso 1 y 2: Sin período activo
+                            // Case 1 and 2: No active period
                             var referenceDate: Date? = null
                             if (lastPeriod != null && !lastPeriod.end_date.isNullOrEmpty()) {
-                                // Usar el "end_date" del último período
+                                // Use the "end_date" of the last period
                                 referenceDate = parseDate(lastPeriod.end_date)
                             } else if (initialDateStr != null) {
-                                // Usar la fecha inicial registrada
+                                // Use the registered initial date
                                 referenceDate = parseDate(initialDateStr)
                             }
 
                             if (referenceDate != null) {
                                 val nextExpectedPeriodDate = addDaysToDate(referenceDate, frequencyDays)
                                 if (today.after(nextExpectedPeriodDate)) {
-                                    // Caso 2: El período se está retrasando
+
+                                    // Case 2: Period is running late
                                     dateEndPeriod = "Tu periodo se está retrasando"
                                 } else {
-                                    // Caso 1: Mostrar la fecha esperada
+                                    // Case 1: Show the expected date
                                     val formattedDate = formatDateToDayMonth(nextExpectedPeriodDate)
                                     dateEndPeriod = formattedDate
                                 }
@@ -264,7 +267,7 @@ fun Home(navController: NavController) {
         }
     }
 
-    // Función para obtener la start_date del último período
+    // Function to get the start_date of the last period
     fun fetchLastPeriodStartDate() {
         firebaseAuthentication.getCurrentUserUid()?.let { userId ->
             firebaseDatabase.getLastPeriodDate(userId) { lastPeriod ->
@@ -280,7 +283,7 @@ fun Home(navController: NavController) {
 
 
 
-    // LaunchedEffect to call calculateIsInPeriod when Home is displayed
+    // LaunchedEffect to call when Home is displayed
     LaunchedEffect(Unit) {
         setUserId()
         setIsInPeriod()
@@ -290,9 +293,6 @@ fun Home(navController: NavController) {
     }
 
 
-
-
-
     var drawerState by remember { mutableStateOf(DrawerValue.Closed) }
     Scaffold(
         topBar = {
@@ -300,7 +300,7 @@ fun Home(navController: NavController) {
                 title = {
                     Text(
                         text = "My Period",
-                        fontFamily = FontFamily.Default, // Replace with Roboto if available
+                        fontFamily = FontFamily.Default,
                         fontSize = 32.sp,
                         color = Color(0xFFAE6BA4)
                     )
@@ -329,7 +329,7 @@ fun Home(navController: NavController) {
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White // Header background color
+                    containerColor = Color.White
                 )
             )
         }
@@ -337,7 +337,7 @@ fun Home(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF4F4F4)) // Background color of the content area
+                .background(Color(0xFFF4F4F4))
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -346,7 +346,7 @@ fun Home(navController: NavController) {
             // "Próximo período" title
             Text(
                 text = statusPeriodText,
-                style = MaterialTheme.typography.bodyLarge, // Assuming bodyStrong is equivalent to bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
                 color = Color(0xFF49454F),
                 textAlign = TextAlign.Center,
                 fontSize = 16.sp,
@@ -359,10 +359,9 @@ fun Home(navController: NavController) {
             Spacer(modifier = Modifier.padding(8.dp))
 
 
-            // Title in AE6BA4 color
             Text(
-                text = periodDaysText, // Replace with your actual title
-                style = MaterialTheme.typography.titleLarge, // Assuming titlePage is equivalent to titleLarge
+                text = periodDaysText,
+                style = MaterialTheme.typography.titleLarge,
                 color = Color(0xFFAE6BA4),
                 textAlign = TextAlign.Center,
                 fontSize = 48.sp,
@@ -374,9 +373,9 @@ fun Home(navController: NavController) {
             )
             Spacer(modifier = Modifier.padding(8.dp))
 
-            // Title in Headline medium/font
+
             Text(
-                text = dateEndPeriod, // Replace with your actual title
+                text = dateEndPeriod,
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = 28.sp,
                 color = Color(0xFF49454F),
@@ -395,7 +394,7 @@ fun Home(navController: NavController) {
 
 
             if (isInPeriod) {
-                // Button with pause icon
+
                 Button(
                     onClick = {
                         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -411,12 +410,12 @@ fun Home(navController: NavController) {
                                     setDateEndPeriod()
                                     fetchLastPeriodStartDate()
                                 } else {
-                                    // Maneja el error (por ejemplo, muestra un mensaje al usuario)
+
                                     println("Error al finalizar el período")
                                 }
                             }
                         } ?: run {
-                            // El usuario no está autenticado
+
                             println("Usuario no autenticado")
                         }
                     },
@@ -430,7 +429,7 @@ fun Home(navController: NavController) {
                             clip = false
                         )
                         .testTag("finishPeriod"),
-                    // Apply clip to the Button composable
+
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
                 ) {
                     Icon(
@@ -441,7 +440,7 @@ fun Home(navController: NavController) {
                     )
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                     Text(
-                        text = "Fin del período", // Replace with your actual button text
+                        text = "Fin del período",
                         style = MaterialTheme.typography.labelLarge,
                         fontSize = 14.sp,
                         color = Color(0xFF65558F)
@@ -457,29 +456,29 @@ fun Home(navController: NavController) {
                         firebaseAuthentication.getCurrentUserUid()?.let { userId ->
                             firebaseDatabase.addNewPeriod(userId, todayDate) { success ->
                                 if (success) {
-                                    // Actualiza el estado local
+
                                     isInPeriod = true
                                     setStatusPeriodText()
                                     setPeriodDaysText()
                                     setDateEndPeriod()
                                     fetchLastPeriodStartDate()
                                 } else {
-                                    // Maneja el error
+
                                     println("Error al iniciar el período")
                                 }
                             }
                         } ?: run {
-                            // El usuario no está autenticado
+
                             println("Usuario no autenticado")
                         }
                     },
                     modifier = Modifier
                         .width(100.dp)
                         .height(82.dp)
-                        .shadow( // Add shadow with elevation 3.dp
+                        .shadow(
                             elevation = 3.dp,
-                            shape = CircleShape, // Use CircleShape for circular button
-                            clip = false // Allow shadow to extend beyond button bounds
+                            shape = CircleShape,
+                            clip = false
                         )
                         .testTag("startPeriod"),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
@@ -487,8 +486,8 @@ fun Home(navController: NavController) {
                     Icon(
                         painter = painterResource(id = R.drawable.add_period),
                         contentDescription = "Add Period",
-                        tint = Color(0xFFAE6BA4), // You can adjust the icon color
-                        modifier = Modifier.size(500.dp) // Adjust icon size as needed
+                        tint = Color(0xFFAE6BA4),
+                        modifier = Modifier.size(500.dp)
                     )
                 }
             }

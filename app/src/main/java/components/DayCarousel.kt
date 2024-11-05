@@ -38,11 +38,11 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
-    val daysList = (1..31).toList() // Rango de días
+    //Range of days
+    val daysList = (1..31).toList()
     val pagerState = rememberPagerState()
     val scope = rememberCoroutineScope()
 
-    // Sincronizar el estado inicial del pager con el día seleccionado
     LaunchedEffect(selectedDays) {
         val index = daysList.indexOf(selectedDays)
         if (index != -1 && index != pagerState.currentPage) {
@@ -50,7 +50,6 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
         }
     }
 
-    // Actualizar selectedDays cuando el usuario cambia de página
     LaunchedEffect(pagerState.currentPage) {
         val newSelectedDay = daysList[pagerState.currentPage]
         onDaysSelected(newSelectedDay)
@@ -59,7 +58,7 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight() // Adjust height as needed
+            .wrapContentHeight()
     ) {
 
         HorizontalPager(
@@ -67,7 +66,7 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
             state = pagerState,
             modifier = Modifier.fillMaxWidth()
         ) { page ->
-            Row ( // Use a Row to display three items
+            Row (
 
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround,
@@ -78,7 +77,7 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
             )
 
             {
-                // Previous Day (without background)
+
                 if (page > 0) {
                     Text(
                         text = "${daysList[page - 1]}" +"\n \n Días",
@@ -87,7 +86,7 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
                             fontFamily = FontFamily.Default,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = Color(0xFF878787) // Adjust color as needed
+                            color = Color(0xFF878787)
                         )
 
                     )
@@ -96,7 +95,7 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
 
                 Spacer(modifier = Modifier.padding( 16.dp))
 
-                // Selected Day (with background)
+
                 val currentDays = daysList[page]
                 val isSelected = currentDays == selectedDays
                 Text(
@@ -121,7 +120,7 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
                 )
                 Spacer(modifier = Modifier.padding( 16.dp))
 
-                // Next Day (without background)
+
                 if (page < daysList.size - 1) {
                     Text(
                         text = "${daysList[page + 1]}" +"\n \n Días",
@@ -130,14 +129,13 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
                             fontFamily = FontFamily.Default,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = Color(0xFF878787) // Adjust color as needed
+                            color = Color(0xFF878787)
                         )
                     )
                 }
             }
         }
 
-        // Arrows for Navigation
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -148,7 +146,7 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
         ) {
             IconButton(
                 onClick = {
-                    scope.launch { // Launch a coroutine
+                    scope.launch {
                         if (pagerState.currentPage > 0) {
                             pagerState.animateScrollToPage(pagerState.currentPage - 1)
                         }
@@ -165,7 +163,7 @@ fun DayCarousel(selectedDays: Int, onDaysSelected: (Int) -> Unit) {
 
             IconButton(
                 onClick = {
-                    scope.launch { // Launch a coroutine
+                    scope.launch {
                         if (pagerState.currentPage < daysList.size - 1) {
                             pagerState.animateScrollToPage(pagerState.currentPage + 1)
                         }

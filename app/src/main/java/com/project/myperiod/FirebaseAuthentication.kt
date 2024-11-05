@@ -2,14 +2,10 @@ package com.project.myperiod
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.database
 import com.google.firebase.ktx.Firebase
 
 class FirebaseAuthentication {
   val auth: FirebaseAuth = Firebase.auth
-    val database = com.google.firebase.Firebase.database("https://my-period-faa86-default-rtdb.europe-west1.firebasedatabase.app/")
-
-
 
   fun loginWithEmailAndPassword(
     email: String,
@@ -42,16 +38,14 @@ class FirebaseAuthentication {
         }
     }
 
-
     fun getCurrentUserUid(): String? {
         val user = Firebase.auth.currentUser
         return user?.uid
     }
 
-
-  fun logout() {
-    auth.signOut()
-  }
+    fun logout() {
+        auth.signOut()
+     }
 
   val isUserLoggedIn: Boolean
     get() = auth.currentUser != null
