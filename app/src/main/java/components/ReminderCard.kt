@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.project.myperiod.R
@@ -56,13 +57,12 @@ fun ReminderCard(    selectedDay: LocalDate,
                 elevation = 4.dp,
                 spotColor = Color.Black,
                 ambientColor = Color.Black,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(6.dp),
                 clip = false
             ),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
-        ),
-        shape = RoundedCornerShape(16.dp),
+        )
     ){
         Row(
             modifier = Modifier
@@ -128,3 +128,15 @@ fun createCalendarIntent(context: Context, selectedDay: LocalDate, selectedMonth
 
     return intent
 }
+
+@Preview(showBackground = true)
+@Composable
+fun ReminderCardPreview() {
+    val context = LocalContext.current // Get the context
+
+            ReminderCard(
+                selectedDay = LocalDate.now(),
+                selectedMonth = LocalDate.now().monthValue,
+                selectedYear = LocalDate.now().year
+            )
+        }

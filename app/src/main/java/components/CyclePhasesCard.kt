@@ -73,7 +73,7 @@ fun CyclePhasesCard(startDate: String) {
     Card(
         modifier = Modifier
             .width(367.dp)
-            .height(195.dp),
+            .height(215.dp),
 
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(16.dp),
@@ -110,13 +110,19 @@ fun CyclePhasesCard(startDate: String) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun CyclePhasesCardPreview() {
+    CyclePhasesCard("yyyy-MM-dd")
+}
+
 
 @Composable
 fun PhaseCard(painter: Painter, title: String, dateRange: String) {
     Card(
         modifier = Modifier
             .width(174.dp)
-            .height(124.dp),
+            .height(140.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF7FF)),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, Color(0xFFCAC4D0))
@@ -149,6 +155,10 @@ fun PhaseCard(painter: Painter, title: String, dateRange: String) {
 
 @Preview(showBackground = true)
 @Composable
-fun CyclePhasesCardPreview() {
-    CyclePhasesCard("yyyy-MM-dd")
+fun PhaseCardPreview() {
+    PhaseCard(
+        painter = painterResource(id = R.drawable.fertility), // Replace with your actual drawable
+        title = "Período fértil",
+        dateRange = "12 - 18 noviembre"
+    )
 }

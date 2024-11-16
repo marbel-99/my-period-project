@@ -1,5 +1,6 @@
 package pages
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,14 +21,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,8 +50,9 @@ import androidx.navigation.compose.rememberNavController
 import com.project.myperiod.FirebaseAuthentication
 import com.project.myperiod.FirebaseDatabase
 import com.project.myperiod.R
-import com.project.myperiod.ui.theme.MyPeriodTheme
 import components.CyclePhasesCard
+import components.DrawerContent
+import kotlinx.coroutines.launch
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -114,13 +119,9 @@ fun Home(navController: NavController) {
     }
 
 
-
-
-
     fun setUserId() {
         userId = firebaseAuthentication.getCurrentUserUid().toString()
     }
-
 
 
     fun parseDate(dateStr: String?): Date? {
@@ -152,7 +153,6 @@ fun Home(navController: NavController) {
     }
 
 
-
     fun setPeriodDaysText() {
         firebaseDatabase.fetchFrequencyDays(userId) { frequencyDays ->
             firebaseDatabase.fetchInitialPeriodDate(userId) { initialDateStr ->
@@ -166,7 +166,8 @@ fun Home(navController: NavController) {
                             val initialDate = parseDate(initialDateStr)
                             if (initialDate != null) {
                                 val nextPeriodDate = addDaysToDate(initialDate, frequencyDays)
-                                val diffInDays = ((nextPeriodDate.time - today.time) / (1000 * 60 * 60 * 24)).toInt()
+                                val diffInDays =
+                                    ((nextPeriodDate.time - today.time) / (1000 * 60 * 60 * 24)).toInt()
                                 val resultText = if (diffInDays > 0) {
                                     "Faltan $diffInDays días"
                                 } else {
@@ -187,7 +188,8 @@ fun Home(navController: NavController) {
                             val endDate = parseDate(lastPeriod.end_date)
                             if (endDate != null) {
                                 val nextPeriodDate = addDaysToDate(endDate, frequencyDays)
-                                val diffInDays = ((nextPeriodDate.time - today.time) / (1000 * 60 * 60 * 24)).toInt()
+                                val diffInDays =
+                                    ((nextPeriodDate.time - today.time) / (1000 * 60 * 60 * 24)).toInt()
                                 val resultText = if (diffInDays > 0) {
                                     "Faltan $diffInDays días"
                                 } else {
@@ -201,7 +203,8 @@ fun Home(navController: NavController) {
                             // Subcase B: "end_date" is null or empty, current period
                             val startDate = parseDate(lastPeriod.start_date)
                             if (startDate != null) {
-                                val diffInDays = ((today.time - startDate.time) / (1000 * 60 * 60 * 24)).toInt()
+                                val diffInDays =
+                                    ((today.time - startDate.time) / (1000 * 60 * 60 * 24)).toInt()
                                 periodDaysText = "$diffInDays días"
                             } else {
                                 periodDaysText = "Error al parsear 'start_date' del período actual"
@@ -233,7 +236,8 @@ fun Home(navController: NavController) {
                                 val formattedDate = formatDateToDayMonth(expectedEndDate)
                                 dateEndPeriod = "Tu periodo debería finalizar el $formattedDate"
                             } else {
-                                dateEndPeriod = "Error al obtener la fecha de inicio del período actual"
+                                dateEndPeriod =
+                                    "Error al obtener la fecha de inicio del período actual"
                             }
                         } else {
                             // Case 1 and 2: No active period
@@ -247,7 +251,8 @@ fun Home(navController: NavController) {
                             }
 
                             if (referenceDate != null) {
-                                val nextExpectedPeriodDate = addDaysToDate(referenceDate, frequencyDays)
+                                val nextExpectedPeriodDate =
+                                    addDaysToDate(referenceDate, frequencyDays)
                                 if (today.after(nextExpectedPeriodDate)) {
 
                                     // Case 2: Period is running late
@@ -281,8 +286,6 @@ fun Home(navController: NavController) {
     }
 
 
-
-
     // LaunchedEffect to call when Home is displayed
     LaunchedEffect(Unit) {
         setUserId()
@@ -293,215 +296,246 @@ fun Home(navController: NavController) {
     }
 
 
-    var drawerState by remember { mutableStateOf(DrawerValue.Closed) }
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "My Period",
-                        fontFamily = FontFamily.Default,
-                        fontSize = 32.sp,
-                        color = Color(0xFFAE6BA4)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick ={ drawerState = DrawerValue.Open }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Menu",
-                            tint = Color(0xFFAE6BA4)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            firebaseAuthentication.logout()
-                            navigateToLogin()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val coroutineScope = rememberCoroutineScope()
+
+    BackHandler(enabled = drawerState.isOpen) {
+        coroutineScope.launch {
+            drawerState.close()
+        }
+    }
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = false,
+        drawerContent = {
+            if (drawerState.isOpen) {
+                DrawerContent(
+                    onCloseDrawer = {
+                        coroutineScope.launch {
+                            drawerState.close()
                         }
+                    }
+                )
+            }
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = "My Period",
+                            fontFamily = FontFamily.Default,
+                            fontSize = 32.sp,
+                            color = Color(0xFFAE6BA4)
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            coroutineScope.launch {
+                                drawerState.open()
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Menu",
+                                tint = Color(0xFFAE6BA4)
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                firebaseAuthentication.logout()
+                                navigateToLogin()
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_logout_24),
+                                contentDescription = "Logout",
+                                tint = Color(0xFFAE6BA4)
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.White
+                    )
+                )
+            },
+        )
+
+        { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFF4F4F4))
+                    .padding(innerPadding),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Spacer(modifier = Modifier.padding(16.dp))
+                // "Próximo período" title
+                Text(
+                    text = statusPeriodText,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color(0xFF49454F),
+                    textAlign = TextAlign.Center,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .testTag("statusPeriodText")
+
+                )
+                Spacer(modifier = Modifier.padding(8.dp))
+
+
+                Text(
+                    text = periodDaysText,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color(0xFFAE6BA4),
+                    textAlign = TextAlign.Center,
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .testTag("periodDaysText")
+
+                )
+                Spacer(modifier = Modifier.padding(8.dp))
+
+
+                Text(
+                    text = dateEndPeriod,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontSize = 28.sp,
+                    color = Color(0xFF49454F),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .testTag("dateEndPeriod")
+                        .width(350.dp)
+                )
+
+                Spacer(modifier = Modifier.padding(36.dp))
+
+
+                CyclePhasesCard(startDate = lastPeriodStartDate)
+
+                Spacer(modifier = Modifier.padding(46.dp))
+
+
+                if (isInPeriod) {
+
+                    Button(
+                        onClick = {
+                            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                            val todayDate = dateFormat.format(Date())
+
+                            firebaseAuthentication.getCurrentUserUid()?.let { userId ->
+                                firebaseDatabase.setLastPeriodEndDate(
+                                    userId,
+                                    todayDate
+                                ) { success ->
+                                    if (success) {
+                                        // Actualiza el estado local
+                                        isInPeriod = false
+                                        setStatusPeriodText()
+                                        setPeriodDaysText()
+                                        setDateEndPeriod()
+                                        fetchLastPeriodStartDate()
+                                    } else {
+
+                                        println("Error al finalizar el período")
+                                    }
+                                }
+                            } ?: run {
+
+                                println("Usuario no autenticado")
+                            }
+                        },
+                        modifier = Modifier
+                            .width(190.dp)
+                            .height(52.dp)
+                            .fillMaxWidth()
+                            .shadow(
+                                elevation = 3.dp,
+                                shape = CircleShape,
+                                clip = false
+                            )
+                            .testTag("finishPeriod"),
+
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.baseline_logout_24),
-                            contentDescription = "Logout",
-                            tint = Color(0xFFAE6BA4)
+                            painter = painterResource(id = R.drawable.baseline_pause_circle_24),
+                            contentDescription = "Pause",
+                            tint = Color(0xFF65558F),
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(
+                            text = "Fin del período",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontSize = 14.sp,
+                            color = Color(0xFF65558F)
                         )
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
-                )
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFF4F4F4))
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+                } else {
 
-            Spacer(modifier = Modifier.padding(16.dp))
-            // "Próximo período" title
-            Text(
-                text = statusPeriodText,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFF49454F),
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .testTag("statusPeriodText")
+                    Button(
+                        onClick = {
+                            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                            val todayDate = dateFormat.format(Date())
 
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
+                            firebaseAuthentication.getCurrentUserUid()?.let { userId ->
+                                firebaseDatabase.addNewPeriod(userId, todayDate) { success ->
+                                    if (success) {
 
+                                        isInPeriod = true
+                                        setStatusPeriodText()
+                                        setPeriodDaysText()
+                                        setDateEndPeriod()
+                                        fetchLastPeriodStartDate()
+                                    } else {
 
-            Text(
-                text = periodDaysText,
-                style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFFAE6BA4),
-                textAlign = TextAlign.Center,
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .testTag("periodDaysText")
-
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-
-
-            Text(
-                text = dateEndPeriod,
-                style = MaterialTheme.typography.headlineMedium,
-                fontSize = 28.sp,
-                color = Color(0xFF49454F),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .testTag("dateEndPeriod")
-            )
-
-            Spacer(modifier = Modifier.padding(36.dp))
-
-
-            CyclePhasesCard(startDate = lastPeriodStartDate)
-
-            Spacer(modifier = Modifier.padding(46.dp))
-
-
-            if (isInPeriod) {
-
-                Button(
-                    onClick = {
-                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val todayDate = dateFormat.format(Date())
-
-                        firebaseAuthentication.getCurrentUserUid()?.let { userId ->
-                            firebaseDatabase.setLastPeriodEndDate(userId, todayDate) { success ->
-                                if (success) {
-                                    // Actualiza el estado local
-                                    isInPeriod = false
-                                    setStatusPeriodText()
-                                    setPeriodDaysText()
-                                    setDateEndPeriod()
-                                    fetchLastPeriodStartDate()
-                                } else {
-
-                                    println("Error al finalizar el período")
+                                        println("Error al iniciar el período")
+                                    }
                                 }
+                            } ?: run {
+
+                                println("Usuario no autenticado")
                             }
-                        } ?: run {
-
-                            println("Usuario no autenticado")
-                        }
-                    },
-                    modifier = Modifier
-                        .width(190.dp)
-                        .height(52.dp)
-                        .fillMaxWidth()
-                        .shadow(
-                            elevation = 3.dp,
-                            shape = CircleShape,
-                            clip = false
+                        },
+                        modifier = Modifier
+                            .width(100.dp)
+                            .height(82.dp)
+                            .shadow(
+                                elevation = 3.dp,
+                                shape = CircleShape,
+                                clip = false
+                            )
+                            .testTag("startPeriod"),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.add_period),
+                            contentDescription = "Add Period",
+                            tint = Color(0xFFAE6BA4),
+                            modifier = Modifier.size(500.dp)
                         )
-                        .testTag("finishPeriod"),
-
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_pause_circle_24),
-                        contentDescription = "Pause",
-                        tint = Color(0xFF65558F),
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
-                    )
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(
-                        text = "Fin del período",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontSize = 14.sp,
-                        color = Color(0xFF65558F)
-                    )
-                }
-            } else {
-
-                Button(
-                    onClick = {
-                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val todayDate = dateFormat.format(Date())
-
-                        firebaseAuthentication.getCurrentUserUid()?.let { userId ->
-                            firebaseDatabase.addNewPeriod(userId, todayDate) { success ->
-                                if (success) {
-
-                                    isInPeriod = true
-                                    setStatusPeriodText()
-                                    setPeriodDaysText()
-                                    setDateEndPeriod()
-                                    fetchLastPeriodStartDate()
-                                } else {
-
-                                    println("Error al iniciar el período")
-                                }
-                            }
-                        } ?: run {
-
-                            println("Usuario no autenticado")
-                        }
-                    },
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(82.dp)
-                        .shadow(
-                            elevation = 3.dp,
-                            shape = CircleShape,
-                            clip = false
-                        )
-                        .testTag("startPeriod"),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFECE6F0))
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.add_period),
-                        contentDescription = "Add Period",
-                        tint = Color(0xFFAE6BA4),
-                        modifier = Modifier.size(500.dp)
-                    )
+                    }
                 }
             }
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
 
-    MyPeriodTheme {
         Home(
             navController = rememberNavController()
         )
-    }
 }
